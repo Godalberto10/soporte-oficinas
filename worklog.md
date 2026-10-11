@@ -18,5 +18,8 @@ en OneDrive y no admite hardlinks.
   programa (pueden llamar al modelo real con mi token), `git add/commit`.
 - deny: leer o editar `.env` (el token no entra en el contexto del modelo),
   `git push`, `rm`, `curl`, `WebFetch` (no publicar, borrar ni sacar datos).
-**Comprobación:** pendiente — pedir a Claude Code que lea .env y verificar que lo deniega.
+**Comprobación:** Claude Code tuvo denegado leer .env y hacer git push (dos
+intentos reales bloqueados por settings.json).
+**GitHub:** repositorio privado Godalberto10/soporte-oficinas; un commit por
+hito; el push lo hago yo.
 **Rechazado:** —
