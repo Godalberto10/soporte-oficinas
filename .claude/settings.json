@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run pytest:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)"
+    ],
+    "ask": [
+      "Bash(uv add:*)",
+      "Bash(uv remove:*)",
+      "Bash(uv run python:*)",
+      "Bash(uv run soporte-oficinas:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Edit(./.env)",
+      "Bash(git push:*)",
+      "Bash(rm:*)",
+      "Bash(curl:*)",
+      "WebFetch"
+    ]
+  }
+}
