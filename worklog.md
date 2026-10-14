@@ -104,3 +104,31 @@ sobran o faltan en `ErrorHerramienta`, pero no oculta un `TypeError` interno;
 dos `Red` no comparten datos; la huella SHA-256 de `data/*.json` no cambia
 tras reiniciar, cerrar y escalar.
 **Rechazado:** —
+
+## Hito 3 — Recuperación BM25 y `buscar_docs` (2026-10-14)
+**Orden lanzada:** borrador de `.claude/commands/hito3.md` escrito por Claude
+Code a petición mía; lo revisé (qué es BM25, para qué sirve el hito, por qué
+no se adelanta un agente) y lancé `/hito3` sin cambios.
+**Qué se hizo:** `recuperacion.py` (tokenizar, trocear por secciones `## `,
+`IndiceBM25` escrito a mano, `cita`), `buscar_docs` como 7.ª herramienta del
+registro (`{"fragmentos": [...]}`, reversible, k entre 1 y 10) e índice
+inyectable en `crear_herramientas(red, indice)`. Pruebas en
+`test_recuperacion.py` y ampliación de `test_herramientas.py`.
+**Decisiones:** unidad de recuperación = sección, con el título del documento
+para distinguir secciones homónimas; cita `docs/<fichero>.md#<seccion>`;
+sin tildes ni palabras vacías; k1=1.5, b=0.75; empates por doc y sección.
+Por qué BM25 y no embeddings: sin dependencias ni red, determinista y explicable.
+**Problema:** "reiniciar un servicio crítico en horario laboral" acertaba
+`politica-reinicios.md` por muy poco (×1,02 frente a `kb-impresora-02.md`,
+que también habla de reiniciar en horario laboral) y "reinicio" ≠ "reiniciar".
+**Solución:** reducción a raíz ligera (sin plural ni vocal final, 6 letras) y
+título con peso 3. Probé 12 combinaciones (longitud de raíz × peso) sobre 12
+consultas y elegí la de mayor margen mínimo: ahora ×1,27 y ×1,46. Nueva prueba
+`test_margen_politica_reinicios` (exige ≥ 1,2; con el código anterior fallaba).
+**Coste aceptado:** "tiempos de respuesta por prioridad" baja de ×2,3 a ×1,17
+porque "tiempo" coincide con `procedimiento-escalado.md`; sigue acertando.
+**Limitación conocida:** BM25 no entiende sinónimos ("sin conexión" ≠ "no
+tengo internet"); se mitiga con las expresiones de los empleados en `## Síntomas`.
+**Comprobación:** `uv run pytest` en verde (124 pruebas).
+**Rechazado:** adelantar el agente de conocimiento a este hito (se hace al
+empezar el hito 4, junto con el bucle común de los agentes).

@@ -14,10 +14,11 @@ from soporte_oficinas.herramientas import (
     crear_herramientas,
     ejecutar,
 )
+from soporte_oficinas.recuperacion import IndiceBM25
 
 NOMBRES = {
     "consultar_servicio", "consultar_equipo", "buscar_tickets",
-    "crear_escalado", "reiniciar_servicio", "cerrar_ticket",
+    "crear_escalado", "reiniciar_servicio", "cerrar_ticket", "buscar_docs",
 }
 IRREVERSIBLES = {"reiniciar_servicio", "cerrar_ticket"}
 
@@ -45,8 +46,24 @@ def test_registro_completo_y_reversibilidad(h):
         assert herramienta.reversible == (nombre not in IRREVERSIBLES)
 
 
-def test_buscar_docs_aun_no_registrada(h):
-    assert "buscar_docs" not in h
+def test_buscar_docs(h):
+    salida = ejecutar(h, "buscar_docs", {"consulta": "vpn caída"})
+    assert set(salida) == {"fragmentos"}
+    assert 0 < len(salida["fragmentos"]) <= 3
+    for fragmento in salida["fragmentos"]:
+        assert {"doc", "seccion", "texto"} <= set(fragmento)
+    assert salida["fragmentos"][0]["doc"] == "docs/kb-red-01.md"
+
+
+def test_buscar_docs_con_k(h):
+    salida = ejecutar(h, "buscar_docs", {"consulta": "servicio", "k": 5})
+    assert len(salida["fragmentos"]) == 5
+
+
+def test_buscar_docs_indice_inyectado(red):
+    indice = IndiceBM25([{"doc": "docs/x.md", "seccion": "S", "texto": "vpn", "titulo": "X"}])
+    h = crear_herramientas(red, indice)
+    assert ejecutar(h, "buscar_docs", {"consulta": "vpn"})["fragmentos"][0]["doc"] == "docs/x.md"
 
 
 # --- Criterio 5: resultados -------------------------------------------------
@@ -113,6 +130,12 @@ def test_cerrar_ticket(h, red):
     ("cerrar_ticket", {"ticket": "T-0001", "resolucion": ""}),
     ("cerrar_ticket", {"ticket": "T-0003", "resolucion": "ya estaba cerrado"}),
     ("cerrar_ticket", {"ticket": "T-9999", "resolucion": "x"}),
+    ("buscar_docs", {"consulta": ""}),
+    ("buscar_docs", {"consulta": 42}),
+    ("buscar_docs", {"consulta": "vpn", "k": 0}),
+    ("buscar_docs", {"consulta": "vpn", "k": 11}),
+    ("buscar_docs", {"consulta": "vpn", "k": "3"}),
+    ("buscar_docs", {"consulta": "vpn", "k": True}),
 ])
 def test_errores_de_herramienta(h, nombre, argumentos):
     with pytest.raises(ErrorHerramienta) as error:

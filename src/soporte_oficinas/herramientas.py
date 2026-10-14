@@ -8,8 +8,11 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
+from soporte_oficinas.recuperacion import IndiceBM25
+
 RUTA_DATOS = Path(__file__).resolve().parents[2] / "data"
 PRIORIDADES = {"P1", "P2", "P3", "P4"}
+MAX_K = 10
 
 
 class ErrorHerramienta(Exception):
@@ -142,6 +145,14 @@ def cerrar_ticket(red: Red, ticket: str, resolucion: str) -> dict:
     return {"ticket": ticket, "estado": "cerrado", "resolucion": resolucion}
 
 
+def buscar_docs(indice: IndiceBM25, consulta: str, k: int = 3) -> dict:
+    """Fragmentos de docs/ más relevantes para la consulta (BM25)."""
+    _exigir_texto(consulta, "consulta")
+    if isinstance(k, bool) or not isinstance(k, int) or not 1 <= k <= MAX_K:
+        raise ErrorHerramienta(f"'k' debe ser un entero entre 1 y {MAX_K}")
+    return {"fragmentos": indice.buscar(consulta, k)}
+
+
 _CATALOGO: list[tuple[Callable[..., dict], str, bool]] = [
     (consultar_servicio, "Estado ok|degradado|caido de un servicio en una oficina.", True),
     (consultar_equipo, "Ficha del inventario (tipo, oficina, modelo, estado) de un equipo.", True),
@@ -152,12 +163,20 @@ _CATALOGO: list[tuple[Callable[..., dict], str, bool]] = [
 ]
 
 
-def crear_herramientas(red: Red) -> dict[str, Herramienta]:
-    """Registro de herramientas atadas a una red concreta."""
-    return {
+def crear_herramientas(red: Red,
+                       indice: IndiceBM25 | None = None) -> dict[str, Herramienta]:
+    """Registro de herramientas atadas a una red y a un índice de documentos."""
+    herramientas = {
         f.__name__: Herramienta(f.__name__, descripcion, reversible, partial(f, red))
         for f, descripcion, reversible in _CATALOGO
     }
+    if indice is None:
+        indice = IndiceBM25.desde_directorio()
+    herramientas["buscar_docs"] = Herramienta(
+        "buscar_docs",
+        "Busca en la base de conocimiento; devuelve fragmentos {doc, seccion, texto}.",
+        True, partial(buscar_docs, indice))
+    return herramientas
 
 
 def ejecutar(herramientas: dict[str, Herramienta], nombre: str,
