@@ -63,8 +63,8 @@ class Modelo(Protocol):
   (p. ej. P3 con un crítico `caido`), el código la sube y lo anota en la traza.
 
 ## Servicios
-- Críticos: `vpn`, `correo`, `erp`, `ficheros`.
-- No críticos: `impresion`, `wifi_invitados`, `intranet`.
+- Críticos: `vpn`, `correo`, `erp`, `ficheros`, `intranet`.
+- No críticos: `impresion`, `wifi_invitados`.
 - Horario laboral: lunes a viernes, 08:00–18:00 (hora local, reloj inyectable).
 
 ## Orquestación: traspaso

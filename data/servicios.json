@@ -1,0 +1,38 @@
+{
+  "MAD-01": {
+    "vpn": "caido",
+    "correo": "ok",
+    "erp": "ok",
+    "ficheros": "ok",
+    "impresion": "ok",
+    "wifi_invitados": "caido",
+    "intranet": "ok"
+  },
+  "MAD-02": {
+    "vpn": "ok",
+    "correo": "ok",
+    "erp": "caido",
+    "ficheros": "ok",
+    "impresion": "degradado",
+    "wifi_invitados": "ok",
+    "intranet": "ok"
+  },
+  "BCN-01": {
+    "vpn": "ok",
+    "correo": "degradado",
+    "erp": "caido",
+    "ficheros": "ok",
+    "impresion": "ok",
+    "wifi_invitados": "ok",
+    "intranet": "ok"
+  },
+  "VAL-01": {
+    "vpn": "ok",
+    "correo": "ok",
+    "erp": "ok",
+    "ficheros": "ok",
+    "impresion": "ok",
+    "wifi_invitados": "ok",
+    "intranet": "ok"
+  }
+}

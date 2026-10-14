@@ -40,3 +40,27 @@ el servicio diagnosticado y está caído o degradado; máx. 1 reinicio por servi
 ticket reabierto → escalado directo; oficinas MAD-01, MAD-02, BCN-01, VAL-01;
 tope de 12 pasos; 2 respuestas ilegibles seguidas → escalado.
 **Diferencias rechazadas:** ninguna en esta versión (147 líneas, < 200).
+
+## Hito 1 — Datos y documentos (2026-10-11)
+**Orden lanzada:** `/hito1` (.claude/commands/hito1.md).
+**Qué se hizo:** `data/servicios.json` (4 oficinas × 7 servicios),
+`data/inventario.json` (14 equipos), `data/tickets.json` (10 tickets);
+`docs/` con 10 artículos `kb-<tipo>-NN.md` (2 por tipo) y las 4 políticas;
+`tests/test_datos.py` (45 pruebas, una o más por criterio de aceptación).
+**Casos difíciles en los datos:**
+- Mismo síntoma, causa distinta: "no tengo internet" en T-0001 (MAD-01, `vpn`
+  caída) y T-0002 (VAL-01, servicios ok, PC-VAL01-002 con tarjeta de red averiada).
+- Ticket reabierto: T-0007 (MAD-02, impresora, 2 reaperturas).
+- Avería multioficina: `erp` caído en MAD-02 y BCN-01.
+**Decisión — intranet pasa a crítica:** el borrador la tenía como no crítica.
+La cambié porque por la intranet pasa el autoservicio de contraseñas y es un
+punto sensible para la seguridad de la red interna. Consecuencias: intranet
+caída → P1, degradada → P2; en horario laboral solo se reinicia si es el
+servicio diagnosticado y está caída o degradada. Actualizados CLAUDE.md, las 4
+políticas, `CRITICOS` en la prueba y la intranet de VAL-01 (de `degradado` a
+`ok`, para que VAL-01 siga siendo el caso de avería de equipo).
+**Comprobación:** al cambiar la lista, `test_mismo_sintoma_causas_distintas`
+falló como se esperaba; tras corregir el dato, `uv run pytest` en verde (45).
+**Coherencia:** las pruebas leen las reglas P1–P4 y la lista de críticos de
+CLAUDE.md y exigen que coincidan con las políticas.
+**Rechazado:** —
