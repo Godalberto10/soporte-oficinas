@@ -132,3 +132,33 @@ tengo internet"); se mitiga con las expresiones de los empleados en `## Síntoma
 **Comprobación:** `uv run pytest` en verde (124 pruebas).
 **Rechazado:** adelantar el agente de conocimiento a este hito (se hace al
 empezar el hito 4, junto con el bucle común de los agentes).
+
+## Hito 4 — Agentes (2026-10-14)
+**Orden lanzada:** borrador de `.claude/commands/hito4.md` escrito por Claude
+Code a petición mía; antes pedí que me explicara qué hace cada agente y lancé
+`/hito4` sin cambios.
+**Qué se hizo:** `agentes.py` con el bucle común (`ejecutar_agente`), la
+definición de los 4 agentes como datos (`AGENTES`), el prompt generado por
+código y las funciones `clasificador`, `diagnostico`, `conocimiento` y
+`escalado`. Pruebas en `test_agentes.py`. Orden de trabajo: primero bucle +
+conocimiento (porción vertical, 19 pruebas en verde) y después los otros tres.
+**Decisiones:**
+- Protocolo: un único JSON por turno, llamada `{"herramienta", "argumentos"}`
+  o salida final con las claves del contrato; se acepta dentro de ```json.
+- Las irreversibles nunca se ejecutan en el bucle: conocimiento las propone en
+  `accion` y, si las llama como turno, se bloquean y se le avisa. Así la
+  confirmación y el guardarraíl del hito 5 no se pueden saltar.
+- El prompt se genera desde el registro (firma con `inspect.signature` y
+  descripción) y solo muestra las herramientas permitidas al agente.
+- Contrato incumplido (faltan claves, `tipo` o prioridad fuera de rango) cuenta
+  como respuesta ilegible; 2 seguidas → `motivo="ilegible"`.
+- Llamadas bloqueadas quedan en la traza con `herramienta=None`, para que nunca
+  parezcan ejecutadas (regla 1).
+- Escalado: si el agente no crea el escalado, lo crea el código con su salida
+  (sin ticket si el del estado no existe); nunca se duplica.
+- La prioridad del clasificador se guarda tal cual; subirla es del hito 5.
+**Comprobación:** `uv run pytest` en verde (160 pruebas).
+**Problema:** un `cat >> ... <<'EOF'` doble en una misma orden de Bash falló
+sin escribir nada; se añadió el código con el editor.
+**Rechazado:** que el clasificador corrija ya la prioridad con los datos (se
+deja al orquestador, que tiene la información de todos los agentes).
