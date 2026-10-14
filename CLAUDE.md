@@ -20,7 +20,7 @@ Salida: `Resultado` con estado final, respuesta al empleado con citas y traza.
 ```
 src/soporte_oficinas/
   estado.py        Estado, Paso, Accion, Resultado (dataclasses)
-  modelo.py        Protocolo Modelo, ScriptedModel, ModeloHF
+  modelo.py        Protocolo Modelo, ScriptedModel, ModeloSimulado, ModeloHF
   herramientas.py  herramientas + registro con descripción y reversible
   recuperacion.py  índice BM25 propio sobre docs/
   agentes.py       clasificador, diagnostico, conocimiento, escalado
@@ -38,8 +38,13 @@ class Modelo(Protocol):
 ```
 - `ScriptedModel(respuestas: list[str])`: devuelve las respuestas en orden;
   si se agotan lanza `RuntimeError`. Solo para pruebas.
+- `ModeloSimulado`: reglas deterministas para usar el programa sin token
+  (`--modelo simulado`, por defecto). No aplica reglas de seguridad: las aplica
+  siempre el orquestador.
 - `ModeloHF`: `huggingface_hub.InferenceClient`, modelo en `HF_MODEL`
-  (por defecto se fija en el hito 6), `temperature=0`, `max_tokens=512`.
+  (por defecto `Qwen/Qwen2.5-72B-Instruct`, **pendiente de verificar**: la
+  cuenta se quedó sin créditos, 402), `temperature=0`, `max_tokens=512`.
+  Reintenta 1 vez solo fallos transitorios (red, 429, 5xx); nunca muestra el token.
 - Todo agente pide al modelo **un único objeto JSON** con las claves de su contrato.
 
 ## Agentes (rol · salida JSON · herramientas permitidas)

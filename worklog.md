@@ -201,3 +201,37 @@ y comprobé que fallan pruebas. La comprobación del tope antes de ejecutar la
 acción no la detectaba ninguna: añadí `test_r3_tope_antes_de_ejecutar_la_accion`.
 **Resultado:** `uv run pytest` en verde (198 pruebas).
 **Rechazado:** —
+
+## Hito 6 — Modelo real y línea de órdenes (2026-10-14)
+**Orden lanzada:** `/hito6` (borrador de Claude Code, lanzado sin cambios).
+**Qué se hizo:** en `modelo.py`, `ModeloHF` (InferenceClient, `temperature=0`,
+`max_tokens=512`, token desde `.env` con python-dotenv) y `ModeloSimulado`
+(reglas deterministas para usar el programa sin token); `cli.py` con
+`argparse` (`--oficina`, `--ticket`, `--modelo simulado|hf`, `--traza`) y
+confirmación en terminal "[s/N]" (EOF = no); el script de `pyproject.toml`
+apunta a `soporte_oficinas.cli:main`. Pruebas en `test_modelo_hf.py` y
+`test_cli.py` con un cliente falso: ninguna usa red ni lee `.env`.
+**Decisiones:**
+- `ModeloSimulado` porque CLAUDE.md reserva `ScriptedModel` para pruebas y
+  `--modelo simulado` necesitaba funcionar solo. No imita las reglas de
+  seguridad: las sigue aplicando el orquestador.
+- Sin terminal interactiva, `confirmar` devuelve False (por seguridad).
+- El error del modelo sale en stderr con código 2, sin traza de Python y con
+  el token sustituido por `***`.
+**Comprobación con el simulado:** "no tengo internet" en MAD-01 → pregunta,
+"s" → reinicia vpn → `resuelto` con cita `kb-red-01.md#Pasos` (9 pasos, sube
+P3→P1); "no puedo entrar en el ERP" en MAD-02 → `escalado` P1, ESC-0001.
+**Prueba real con Hugging Face:**
+`uv run soporte-oficinas "no tengo internet" --oficina MAD-01 --modelo hf --traza`
+→ `402 Payment Required: You have no remaining credits` con
+`Qwen/Qwen2.5-72B-Instruct`. El programa respondió como debía: mensaje claro,
+sin token, código 2.
+**Mejora tras el error:** se reintentaba también el 402 (una llamada inútil).
+Ahora solo se reintentan fallos transitorios (red, 429, 5xx); prueba
+`test_solo_reintenta_fallos_transitorios` (401/402/404 → 1 llamada; 429/5xx → 2).
+**Pendiente:** preguntar al profesor cómo conseguir créditos (o si la
+asignatura los da) y repetir la prueba real; entonces confirmar el modelo por
+defecto en CLAUDE.md (ahora marcado "pendiente de verificar"). Alternativas
+vistas: esperar la renovación mensual, clave propia de un proveedor (p. ej.
+Groq) en los ajustes de Inference Providers, o Ollama local vía `base_url`.
+**Resultado:** `uv run pytest` en verde (239 pruebas).
