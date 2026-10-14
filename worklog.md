@@ -162,3 +162,42 @@ conocimiento (porción vertical, 19 pruebas en verde) y después los otros tres.
 sin escribir nada; se añadió el código con el editor.
 **Rechazado:** que el clasificador corrija ya la prioridad con los datos (se
 deja al orquestador, que tiene la información de todos los agentes).
+
+## Hito 5 — Orden `/hito5`: decisión sobre `rechazado` (2026-10-14)
+**Problema:** CLAUDE.md era ambiguo: con una acción rechazada decía "final
+`escalado` o `rechazado`", pero las reglas de traspaso decían "→ escalado".
+**Decisión mía:** si el usuario rechaza la acción o no le parece bien, se
+escala a segundo nivel hasta encontrar una solución coherente; `rechazado`
+solo cuando la entrada no es válida (oficina o ticket inexistentes) o la
+petición no es de soporte de oficinas. Para lo segundo se añade el tipo
+`fuera_de_ambito` (distinto de `otro`, que es soporte sin categoría).
+Actualizados CLAUDE.md y la orden del hito 5.
+**Riesgo conocido:** detectar `fuera_de_ambito` depende del modelo; un falso
+positivo perdería una incidencia válida.
+
+## Hito 5 — Orquestador y reglas R1–R5 (2026-10-14)
+**Orden lanzada:** `/hito5` (borrador de Claude Code con mi decisión sobre
+`rechazado` y el tipo `fuera_de_ambito`, ver entrada anterior).
+**Qué se hizo:** `orquestador.py` con `orquestar()` (firma de CLAUDE.md más
+`red` e `indice` opcionales para pruebas), `guardarrail`, `prioridad_minima`,
+`subir_prioridad`, `comprobar_citas`, `en_horario`, `trayectoria` y la
+respuesta al empleado redactada por código. Ajustes en `agentes.py`: tipo
+`fuera_de_ambito`, `Paso.n` = posición en la traza, notas del orquestador en
+el mensaje inicial y `asegurar_escalado` pública. Pruebas en `test_orquestador.py`.
+**Decisiones:**
+- La prioridad mínima se calcula con el servicio diagnosticado (no con
+  cualquier servicio de la oficina); solo se sube, nunca se baja.
+- Las anotaciones del orquestador quedan en la traza pero no cuentan para el tope.
+- El escalado nunca baja la prioridad del estado (se envuelve `crear_escalado`),
+  así la avería multioficina sale con P1 aunque el agente proponga P2.
+- Guardarraíl ampliado: no se reinicia un servicio de otra oficina, máximo 1
+  reinicio por servicio siempre, y solo se cierra el ticket de la incidencia.
+- Si el agente escalado no responde bien, el código crea el escalado con un
+  resumen automático: siempre hay id.
+**Comprobación con mutaciones:** rompí a propósito cada regla (R1 sin
+confirmar, R2 sin guardarraíl, R3 sin tope antes de la acción, R4 sin escalar
+ilegibles, R5 sin comprobar citas, prioridad sin subir, reabierto sin escalar)
+y comprobé que fallan pruebas. La comprobación del tope antes de ejecutar la
+acción no la detectaba ninguna: añadí `test_r3_tope_antes_de_ejecutar_la_accion`.
+**Resultado:** `uv run pytest` en verde (198 pruebas).
+**Rechazado:** —

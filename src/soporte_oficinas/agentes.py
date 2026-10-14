@@ -16,7 +16,8 @@ from soporte_oficinas.herramientas import (
 )
 from soporte_oficinas.modelo import Modelo
 
-TIPOS = frozenset({"red", "impresora", "acceso_aplicacion", "correo", "hardware", "otro"})
+TIPOS = frozenset({"red", "impresora", "acceso_aplicacion", "correo", "hardware", "otro",
+                   "fuera_de_ambito"})
 SERVICIOS = frozenset({"vpn", "correo", "erp", "ficheros", "intranet",
                        "impresion", "wifi_invitados"})
 ACCIONES_PROPONIBLES = frozenset({"reiniciar_servicio", "cerrar_ticket"})
@@ -144,7 +145,9 @@ AGENTES: dict[str, Agente] = {
     "clasificador": Agente(
         "clasificador",
         "Decides el tipo de incidencia y su prioridad.\n"
-        f"Tipos: {', '.join(sorted(TIPOS))}.\n"
+        f"Tipos: {', '.join(sorted(TIPOS))}. Usa 'otro' para incidencias de soporte "
+        "sin categoría y 'fuera_de_ambito' si la petición no es de soporte técnico "
+        "de oficinas.\n"
         "Prioridades: P1 afecta a más de una oficina o un servicio crítico está "
         "caido; P2 afecta a una oficina entera o un crítico está degradado; P3 un "
         "empleado no puede trabajar y no hay alternativa; P4 molestia con alternativa.\n"
@@ -221,9 +224,12 @@ def mensaje_inicial(estado: Estado) -> str:
         for clave in ("tipo", "prioridad", "causa", "servicio", "procedimiento", "citas")
         if getattr(estado, clave)
     }
-    return json.dumps({"incidencia": estado.incidencia, "oficina": estado.oficina,
-                       "ticket": estado.ticket, "averiguado": averiguado},
-                      ensure_ascii=False)
+    mensaje = {"incidencia": estado.incidencia, "oficina": estado.oficina,
+               "ticket": estado.ticket, "averiguado": averiguado}
+    notas = [p.observacion for p in estado.traza if p.agente == "orquestador"]
+    if notas:
+        mensaje["notas_del_orquestador"] = notas
+    return json.dumps(mensaje, ensure_ascii=False)
 
 
 def _observacion(contenido: Any) -> dict[str, str]:
@@ -235,9 +241,10 @@ def _observacion(contenido: Any) -> dict[str, str]:
 
 def registrar(estado: Estado, agente: str, herramienta: str | None,
               argumentos: dict, observacion: Any) -> None:
-    """Añade un paso a la traza y lo cuenta."""
+    """Añade un paso a la traza y lo cuenta para el tope (n = posición en la traza)."""
     estado.pasos += 1
-    estado.traza.append(Paso(estado.pasos, agente, herramienta, argumentos, observacion))
+    estado.traza.append(Paso(len(estado.traza) + 1, agente, herramienta, argumentos,
+                             observacion))
 
 
 def _es_llamada(datos: dict) -> bool:
@@ -339,7 +346,8 @@ def _escalado_ya_creado(estado: Estado, desde: int) -> str | None:
     return None
 
 
-def _crear_escalado(estado: Estado, datos: dict, herramientas: dict[str, Herramienta]) -> str:
+def asegurar_escalado(estado: Estado, datos: dict,
+                      herramientas: dict[str, Herramienta]) -> str:
     """Crea el escalado con la salida del agente; sin ticket si el del estado no vale."""
     for ticket in dict.fromkeys([estado.ticket, None]):
         argumentos = {"ticket": ticket, "resumen": datos["resumen"],
@@ -361,5 +369,6 @@ def escalado(estado: Estado, modelo: Modelo, herramientas: dict[str, Herramienta
     salida = ejecutar_agente(AGENTES["escalado"], estado, modelo, herramientas, max_pasos)
     if salida.datos is not None:
         id_escalado = _escalado_ya_creado(estado, desde)
-        salida.datos["escalado"] = id_escalado or _crear_escalado(estado, salida.datos, herramientas)
+        salida.datos["escalado"] = id_escalado or asegurar_escalado(
+            estado, salida.datos, herramientas)
     return salida

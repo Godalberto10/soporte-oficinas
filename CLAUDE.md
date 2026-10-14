@@ -50,7 +50,9 @@ class Modelo(Protocol):
 | conocimiento | procedimiento | `{"procedimiento", "citas": [..], "accion": null \| {..}}` | `buscar_docs`, `reiniciar_servicio`, `cerrar_ticket` |
 | escalado | traspaso a nivel 2 | `{"resumen", "probado": [..], "prioridad"}` | `crear_escalado` |
 
-- `tipo` ∈ {`red`, `impresora`, `acceso_aplicacion`, `correo`, `hardware`, `otro`}.
+- `tipo` ∈ {`red`, `impresora`, `acceso_aplicacion`, `correo`, `hardware`, `otro`,
+  `fuera_de_ambito`}. `otro` = soporte sin categoría; `fuera_de_ambito` = no es
+  una incidencia de soporte de oficinas.
 - Un agente solo puede llamar a sus herramientas; otra llamada es una
   observación de error, no se ejecuta.
 
@@ -86,6 +88,8 @@ def orquestar(incidencia: str, oficina: str, modelo: Modelo,
   servicio, procedimiento, citas, acciones, traza: list[Paso], pasos, final.
 - `Paso`: n, agente, herramienta | None, argumentos, observacion.
 - `final` ∈ {`resuelto`, `escalado`, `tope_alcanzado`, `rechazado`}.
+  `rechazado` = entrada no válida (oficina o ticket inexistentes) o
+  `fuera_de_ambito`. Una acción que el usuario rechaza se escala, no es `rechazado`.
 
 ## Herramientas (nombre · argumentos · reversible)
 - `consultar_servicio(servicio, oficina)` → estado `ok|degradado|caido` · sí
