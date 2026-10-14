@@ -64,3 +64,43 @@ falló como se esperaba; tras corregir el dato, `uv run pytest` en verde (45).
 **Coherencia:** las pruebas leen las reglas P1–P4 y la lista de críticos de
 CLAUDE.md y exigen que coincidan con las políticas.
 **Rechazado:** —
+
+## Hito 2 — Orden `/hito2` (2026-10-14)
+**Orden lanzada:** pedí a Claude Code un borrador de `.claude/commands/hito2.md`
+(estado.py, modelo.py, herramientas.py y sus pruebas) siguiendo el formato de hito1.
+**Decisiones del borrador que acepté:** `ModeloHF` se deja para el hito 6 y
+`buscar_docs` para el hito 3 (no adelantar hitos); clase `Red` que carga los JSON
+desde una ruta y aplica los cambios solo en memoria (las pruebas no ensucian
+`data/`); confirmación y guardarraíl fuera de las herramientas (son del orquestador).
+**Mejoras que pedí y acepté tras revisarlo:**
+1. `crear_herramientas(red)` conserva las firmas de CLAUDE.md, y `ejecutar(...)`
+   es el único punto de llamada: herramienta inexistente o argumentos mal formados
+   → `ErrorHerramienta`, comprobando la firma con `inspect.signature().bind` para
+   no ocultar fallos internos. Motivo: el orquestador solo captura un tipo de error (R4).
+2. Campos de `Resultado` fijados (`final`, `respuesta`, `citas`, `traza`, `tipo`,
+   `prioridad`, `escalado`), porque CLAUDE.md no los listaba y la evaluación del
+   hito 7 comprueba `final`, tipo y prioridad.
+3. Cada `Red` con su propia copia de los datos y prueba de aislamiento, para que
+   el máximo de 1 reinicio por servicio no se mezcle entre ejecuciones.
+**Rechazado / aplazado:** `parametros` en el registro (se verá en el hito 4, al
+escribir los prompts) y tipos `Literal` (mejora menor).
+
+## Hito 2 — Estado, modelo simulado y herramientas (2026-10-14)
+**Orden lanzada:** `/hito2`.
+**Qué se hizo:** `estado.py` (Paso, Accion, Estado, Resultado), `modelo.py`
+(Protocol `Modelo` y `ScriptedModel`, que guarda las llamadas recibidas),
+`herramientas.py` (`Red`, `ErrorHerramienta`, `Herramienta`,
+`crear_herramientas`, `ejecutar` y las 6 herramientas; `buscar_docs` queda
+para el hito 3). Pruebas: `test_estado.py`, `test_modelo.py`, `test_herramientas.py`.
+**Decisiones de implementación:** cada herramienta se ata a su `Red` con
+`functools.partial` y conserva la firma de CLAUDE.md; los argumentos se
+validan como texto, para que una lista o un número enviados por el modelo den
+`ErrorHerramienta`; `crear_escalado` admite `ticket=None` (el ticket es
+opcional); todas las herramientas devuelven `dict` (`buscar_tickets` →
+`{"tickets": [...]}`).
+**Comprobación:** `uv run pytest` en verde (84 pruebas, 45 de test_datos).
+Pruebas clave: `ejecutar` convierte herramienta inexistente y argumentos que
+sobran o faltan en `ErrorHerramienta`, pero no oculta un `TypeError` interno;
+dos `Red` no comparten datos; la huella SHA-256 de `data/*.json` no cambia
+tras reiniciar, cerrar y escalar.
+**Rechazado:** —
