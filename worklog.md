@@ -376,3 +376,15 @@ cite un artículo de otro tipo. `uv run pytest` → 276 en verde.
 **Limitación conocida:** el simulado sigue funcionando por palabras clave; una
 frase sin ninguna conocida puede acabar en `fuera_de_ambito` por error. Con
 el modelo real lo decide el clasificador.
+
+## README — orden exacta de ejecución
+**Qué se hizo:** README con instalación (`uv sync`), pruebas, ejecución,
+cuatro ejemplos, evaluación y uso opcional del modelo real. Redactado por
+Claude con mis decisiones.
+**Decisiones (mías):** los ejemplos enseñan la confirmación humana y los tres
+casos difíciles del enunciado. Mi primera propuesta (internet en MAD-02, ERP
+en VAL-01…) no encajaba con los datos: la lancé y vi que la vpn caída está en
+MAD-01 y el ERP caído en MAD-02 y BCN-01, así que la ajusté. El modelo real se
+explica, pero cada uno usa su propio token en su `.env`: el mío no se entrega.
+**Comprobación:** ejecutadas todas las órdenes del README tal cual; dan lo que
+dice cada comentario.
