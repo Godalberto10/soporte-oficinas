@@ -388,3 +388,15 @@ MAD-01 y el ERP caído en MAD-02 y BCN-01, así que la ajusté. El modelo real s
 explica, pero cada uno usa su propio token en su `.env`: el mío no se entrega.
 **Comprobación:** ejecutadas todas las órdenes del README tal cual; dan lo que
 dice cada comentario.
+
+## Informe (borrador)
+**Qué se hizo:** `informe.pdf` (3 páginas por ahora) generado con
+`informe/generar.py` (`uv run --no-project --with reportlab`, para no añadir
+dependencias al proyecto). Redactado por Claude a partir de mis decisiones de
+esta revisión; a mi nombre y con diseño propio, sin plantilla institucional.
+**Estructura:** problema y alcance; arquitectura (agentes, traspaso, estado y
+mensajes); herramientas y BM25; R1–R5 y permisos; pruebas y mi evaluación
+(con los hallazgos de la primera pasada); dos trazas reales; forma de trabajo
+y limitaciones. Sigue el reparto de puntos del enunciado.
+**Pendiente:** las dos trazas reales (`informe/traza1.txt` y `traza2.txt`)
+cuando haya créditos de HF; el script las inserta solo.
