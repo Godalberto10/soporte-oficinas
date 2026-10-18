@@ -82,19 +82,34 @@ PALABRAS_TIPO = [  # el orden importa: "no puedo entrar en el ERP" no es red
     ("impresora", ("imprim", "impresora", "toner", "atasco")),
     ("acceso_aplicacion", ("erp", "contrasena", "acceso", "aplicacion", "entrar")),
     ("correo", ("correo", "buzon", "outlook")),
-    ("hardware", ("portatil", "monitor", "enciende", "pantalla", "teclado")),
+    ("hardware", ("portatil", "monitor", "enciende", "pantalla", "teclado",
+                  "ordenador", "pc", "equipo", "lent", "raton", "cuelg")),
     ("red", ("internet", "vpn", "conexion", "red", "wifi", "navegar")),
 ]
+PALABRAS_SOPORTE = ("funcion", "error", "fall", "problema", "puedo", "programa",
+                    "instal", "actualiz", "oficina", "roto", "rota")
+PRIORIDAD_TIPO = {"impresora": "P4"}  # suele haber otra impresora disponible
+PALABRAS_MOLESTIA = ("lent", "tard", "cuelg")  # puede trabajar, aunque peor → P4
 SERVICIO_TIPO = {"red": "vpn", "impresora": "impresion",
                  "acceso_aplicacion": "erp", "correo": "correo"}
 
 
+def _tiene(tokens: list[str], raices: tuple[str, ...]) -> bool:
+    return any(t.startswith(r) for t in tokens for r in raices)
+
+
 def _tipo_por_palabras(texto: str) -> str:
+    """Tipo por palabras clave; sin ninguna, `otro` si suena a soporte."""
     tokens = tokenizar(texto)
     for tipo, raices in PALABRAS_TIPO:
-        if any(t.startswith(r) for t in tokens for r in raices):
+        if _tiene(tokens, raices):
             return tipo
-    return "otro"
+    return "otro" if _tiene(tokens, PALABRAS_SOPORTE) else "fuera_de_ambito"
+
+
+def _de_su_tipo(fragmentos: list[dict], tipo: str) -> list[dict]:
+    """Solo artículos kb-<tipo>-NN.md: no se cita un artículo de otro tipo."""
+    return [f for f in fragmentos if f["doc"].startswith(f"docs/kb-{tipo}-")]
 
 
 def _ultima_observacion(mensajes: list[dict]) -> Any:
@@ -121,7 +136,9 @@ class ModeloSimulado:
 
     def _clasificador(self, ctx: dict, turno: int, mensajes: list[dict]) -> dict:
         tipo = _tipo_por_palabras(ctx["incidencia"])
-        return {"tipo": tipo, "prioridad": "P3",
+        molestia = _tiene(tokenizar(ctx["incidencia"]), PALABRAS_MOLESTIA)
+        prioridad = "P4" if molestia else PRIORIDAD_TIPO.get(tipo, "P3")
+        return {"tipo": tipo, "prioridad": prioridad,
                 "motivo": f"palabras clave de la incidencia: {tipo}"}
 
     def _diagnostico(self, ctx: dict, turno: int, mensajes: list[dict]) -> dict:
@@ -144,7 +161,8 @@ class ModeloSimulado:
         if turno == 0:
             consulta = f"{ctx['incidencia']} {averiguado.get('causa', '')}"
             return {"herramienta": "buscar_docs", "argumentos": {"consulta": consulta, "k": 5}}
-        fragmentos = _ultima_observacion(mensajes).get("fragmentos", [])
+        fragmentos = _de_su_tipo(_ultima_observacion(mensajes).get("fragmentos", []),
+                                 averiguado.get("tipo", ""))
         if not fragmentos:
             return {"procedimiento": None, "citas": [], "accion": None}
         elegido = next((f for f in fragmentos if f["seccion"] == "Pasos"), fragmentos[0])

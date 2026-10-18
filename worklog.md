@@ -352,3 +352,27 @@ créditos.
 **Decisiones para el hito 7b:** rechazado sin prioridad (D1); artículo
 `kb-hardware-03`; simulado con más palabras clave, `fuera_de_ambito`, P4 para
 impresoras (D2) y sin citar artículos de otro tipo.
+
+## Hito 7b — Arreglos tras la evaluación
+**Orden lanzada:** `/hito7b`, redactada por Claude con mis decisiones sobre
+los 5 fallos del hito 7. Regla: arreglar la causa, nunca cambiar lo esperado.
+**Decisiones (mías):**
+- D1: un rechazo no tiene prioridad (lo que no se tramita no se prioriza).
+  Era un fallo del código que encontró mi caso 7.
+- Artículo `kb-hardware-03.md` "El equipo va lento" con mi procedimiento:
+  reiniciar, cerrar programas y, si sigue igual, contactar con el equipo técnico.
+- ModeloSimulado (lo usará la web): más palabras de hardware; `fuera_de_ambito`
+  si no encaja en ningún tipo ni suena a soporte; P4 inicial para impresoras
+  (D2: suele haber otra disponible); no cita artículos de otro tipo.
+**Propuesta de Claude que acepté:** en el simulado, P4 inicial si la
+incidencia habla de lentitud ("lento", "tarda", "se cuelga"), aplicando mi
+definición de P4 (molestia con alternativa). El orquestador la sigue subiendo
+con los datos: en el caso 6 el correo empieza en P4 y acaba en P2.
+**Comprobación:** las marcas `xfail(strict=True)` avisaron de cada arreglo
+(XPASS) y después se quitaron. Evaluación: guion 11/11, simulado 9/9.
+Pruebas nuevas: rechazo sin prioridad, búsqueda "me va lento el ordenador" →
+`kb-hardware-03`, clasificación y prioridad inicial del simulado, y que no
+cite un artículo de otro tipo. `uv run pytest` → 276 en verde.
+**Limitación conocida:** el simulado sigue funcionando por palabras clave; una
+frase sin ninguna conocida puede acabar en `fuera_de_ambito` por error. Con
+el modelo real lo decide el clasificador.

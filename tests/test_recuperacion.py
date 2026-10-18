@@ -123,6 +123,7 @@ def test_consulta_sin_coincidencias_devuelve_vacio(indice):
     ("reiniciar un servicio crítico en horario laboral", "politica-reinicios.md"),
     ("reinicio de servicios críticos", "politica-reinicios.md"),
     ("el portátil no enciende", "kb-hardware-01.md"),
+    ("me va lento el ordenador", "kb-hardware-03.md"),
     ("ninguna impresora imprime", "kb-impresora-02.md"),
 ])
 def test_calidad_primer_resultado(indice, consulta, esperado):

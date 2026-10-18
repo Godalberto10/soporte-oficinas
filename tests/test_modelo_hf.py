@@ -1,5 +1,6 @@
 """Pruebas de ModeloHF (con cliente falso, sin red) y de ModeloSimulado."""
 
+import json
 from datetime import datetime
 from types import SimpleNamespace
 
@@ -165,6 +166,32 @@ def test_simulado_equipo_sin_reinicio():
     ("el correo tarda mucho", "correo"),
     ("el portátil no enciende", "hardware"),
     ("la silla está rota", "otro"),
+    ("me va lento el ordenador", "hardware"),
+    ("el PC se cuelga", "hardware"),
+    ("¿me recomiendas un restaurante?", "fuera_de_ambito"),
 ])
 def test_simulado_clasifica_por_palabras(incidencia, tipo):
     assert modulo_modelo._tipo_por_palabras(incidencia) == tipo
+
+
+@pytest.mark.parametrize("incidencia, prioridad", [
+    ("la impresora no imprime", "P4"),      # suele haber otra impresora
+    ("me va lento el ordenador", "P4"),     # molestia: puede seguir trabajando
+    ("no tengo internet", "P3"),
+])
+def test_simulado_prioridad_inicial(incidencia, prioridad):
+    contexto = {"incidencia": incidencia, "oficina": "MAD-01", "averiguado": {}}
+    datos = ModeloSimulado()._clasificador(contexto, 0, [])
+    assert datos["prioridad"] == prioridad
+
+
+def test_simulado_no_cita_articulos_de_otro_tipo():
+    contexto = {"incidencia": "me va lento el ordenador", "oficina": "MAD-01",
+                "averiguado": {"tipo": "hardware", "causa": "equipo lento"}}
+    observacion = {"fragmentos": [{"doc": "docs/kb-red-02.md", "seccion": "Pasos",
+                                   "texto": "1. Probar otro cable."}]}
+    mensajes = [{"role": "user", "content": json.dumps(contexto)},
+                {"role": "assistant", "content": "{}"},
+                {"role": "user", "content": "Observación: " + json.dumps(observacion)}]
+    datos = ModeloSimulado()._conocimiento(contexto, 1, mensajes)
+    assert datos["procedimiento"] is None and datos["citas"] == []

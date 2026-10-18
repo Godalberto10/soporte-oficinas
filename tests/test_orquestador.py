@@ -366,6 +366,13 @@ def test_fuera_de_ambito_rechazado(red):
     assert resultado.escalado is None and red.escalados == []
 
 
+def test_rechazo_sin_prioridad(red):
+    """Hito 7b, D1: lo que no se tramita no tiene prioridad."""
+    resultado, _ = correr([clasificacion("fuera_de_ambito", "P4")], red,
+                          incidencia="¿Me recomiendas un restaurante?")
+    assert resultado.tipo == "fuera_de_ambito" and resultado.prioridad is None
+
+
 # --- Criterio 12: horario laboral --------------------------------------------------
 
 @pytest.mark.parametrize("momento, esperado", [

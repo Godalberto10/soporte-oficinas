@@ -175,6 +175,8 @@ def terminar(ctx: Contexto, final: str, escalado: str | None = None,
 
 
 def _rechazar(ctx: Contexto, motivo: str) -> Resultado:
+    """Lo que no se tramita no tiene prioridad (decisión D1 del hito 7b)."""
+    ctx.estado.prioridad = None
     anotar(ctx.estado, f"rechazado: {motivo}")
     return terminar(ctx, "rechazado", motivo=motivo)
 

@@ -1,7 +1,7 @@
 """Evaluación (hito 7): mis casos con resultado y trayectoria esperados.
 
-Los fallos conocidos se marcan xfail(strict=True): si se arreglan, la prueba
-avisa para quitar la marca. No se cambia lo esperado para que pase.
+Lo esperado no se cambia para que pase. Los 5 fallos que encontró la primera
+pasada (hito 7) se arreglaron en el hito 7b; ver worklog.
 """
 
 import pytest
@@ -11,35 +11,21 @@ from soporte_oficinas.modelo import ModeloSimulado
 
 POR_NUMERO = {c.n: c for c in CASOS}
 
-FALLOS_GUION = {
-    7: "un rechazo fuera de ámbito conserva la prioridad del clasificador (P4); "
-       "yo espero que no tenga prioridad",
-    11: "no existe un artículo sobre equipos lentos: la cita a kb-hardware-03 se "
-        "elimina (R5) y se escala",
-}
-FALLOS_SIMULADO = {
-    4: "el simulado siempre propone P3 y la prioridad solo se sube: no llega a P4",
-    7: "el simulado no reconoce lo que está fuera de ámbito: lo clasifica como 'otro'",
-    11: "el simulado no reconoce 'ordenador' (tipo otro, P3) y cita kb-red-02, "
-        "que no trata de equipos lentos",
-}
+
+def _ids(casos) -> list[str]:
+    return [f"{c.n}-{c.nombre}" for c in casos]
 
 
-def _parametros(casos, fallos):
-    return [pytest.param(c, id=f"{c.n}-{c.nombre}",
-                         marks=[pytest.mark.xfail(reason=fallos[c.n], strict=True)]
-                         if c.n in fallos else [])
-            for c in casos]
-
-
-@pytest.mark.parametrize("caso", _parametros(CASOS, FALLOS_GUION))
+@pytest.mark.parametrize("caso", CASOS, ids=_ids(CASOS))
 def test_caso_con_guion(caso):
     evaluacion = evaluar(caso)
     assert evaluacion.obtenido() == caso.esperado
 
 
-@pytest.mark.parametrize("caso", _parametros([c for c in CASOS if c.simulado],
-                                             FALLOS_SIMULADO))
+SIMULABLES = [c for c in CASOS if c.simulado]
+
+
+@pytest.mark.parametrize("caso", SIMULABLES, ids=_ids(SIMULABLES))
 def test_caso_con_modelo_simulado(caso):
     evaluacion = evaluar(caso, ModeloSimulado())
     assert evaluacion.obtenido() == caso.esperado
