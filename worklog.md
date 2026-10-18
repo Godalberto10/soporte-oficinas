@@ -316,3 +316,39 @@ pública y tiene dos huecos visibles: clasifica "¿me recomiendas un
 restaurante?" como `otro` en vez de `fuera_de_ambito` y no reconoce frases sin
 sus palabras clave ("estoy sin conexión"). Se mejora en el hito 8, antes de
 publicar la web; las reglas de seguridad no cambian porque son del orquestador.
+
+## Hito 7 — Evaluación con mis casos
+**Orden lanzada:** `/hito7`. Sustituye a un borrador anterior de Claude: la
+tabla de casos y lo esperado son míos. Claude redactó la orden a partir de mi
+tabla e implementó `evaluacion.py` y `tests/test_evaluacion.py`.
+**Cómo definí lo esperado:** apliqué mis reglas con un método de 7 preguntas en
+orden (¿entrada válida? ¿es soporte? tipo, prioridad, ¿reabierto o varias
+oficinas?, ¿hay artículo?, ¿acción irreversible y confirmación?). Al aplicarlo
+me equivoqué en tres casos y los corregí al revisar la regla: en el 1 puse P3
+(la vpn caída es un crítico caído → P1), en el 6 puse P1 (el correo está
+degradado, no caído → P2) y en el 10 pensé que se reiniciaba (el guardarraíl
+bloquea sin preguntar porque el erp no es el servicio diagnosticado).
+Añadí el caso 11 ("me va lento el ordenador") tras probar el programa con una
+frase mía: el simulado lo daba por resuelto citando el artículo de la tarjeta
+de red.
+**Casos:** 11 (felices, los tres difíciles del enunciado, prioridades que sube
+el código, R1, R2, R5, entrada no válida, fuera de ámbito y el mío). Cada uno
+con dos pasadas: guion (`ScriptedModel`, comprueba mis reglas) y
+`ModeloSimulado` (lo que vería un usuario sin token). Sin modelo real: gastaría
+créditos.
+**Resultado:** con guion 9/11; con el simulado 6/9. Los fallos quedan como
+`xfail` con su motivo, sin cambiar lo esperado ni el código:
+- Guion 7: un rechazo fuera de ámbito conserva la prioridad P4 del
+  clasificador. **Fallo del código**: lo que no se tramita no tiene prioridad.
+- Guion 11: no hay artículo de equipos lentos; la cita se elimina (R5) y se
+  escala. **Falta contenido** en `docs/`.
+- Simulado 4: escala bien pero con P3 (el simulado siempre empieza en P3).
+- Simulado 7: trata el restaurante como `otro` y lo "resuelve".
+- Simulado 11: acierta el final por casualidad (resuelto, C-D-K) con tipo,
+  prioridad y artículo equivocados. Prueba de que hay que evaluar también la
+  trayectoria y los datos, no solo el final.
+**Comprobación:** `uv run pytest` → 260 en verde y 5 `xfail`;
+`python -m soporte_oficinas.evaluacion [--modelo simulado]` imprime la tabla.
+**Decisiones para el hito 7b:** rechazado sin prioridad (D1); artículo
+`kb-hardware-03`; simulado con más palabras clave, `fuera_de_ambito`, P4 para
+impresoras (D2) y sin citar artículos de otro tipo.
