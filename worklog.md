@@ -533,3 +533,15 @@ hasta ahora Claude redactaba esos ficheros con mis decisiones.
 your permission settings"). Tampoco puede quitarse el candado: `settings.json`
 está dentro de `.claude/`. Si hace falta cambiar algo, lo edito yo.
 **Rechazado:** —
+
+## Comprobación final en limpio (hecha por mí)
+**Qué hice:** como lo hará el profesor: descomprimí el zip de la entrega con el
+Explorador de Windows en una carpeta nueva del Escritorio (sin `.env` ni
+`.venv`), abrí una terminal allí y seguí el README: `uv sync`, `uv run pytest`
+y `uv run soporte-oficinas "no tengo internet" --oficina MAD-01 --traza`,
+respondiendo "s"; también arranqué la web con
+`uv run --group web streamlit run app.py`.
+**Resultado:** todo funcionó: las pruebas en verde (las de la página web se
+omiten sin el grupo `web`, como está previsto), la orden del README acabó en
+resuelto con P1 y su traza, y la web abrió y respondió.
+**Rechazado:** —
