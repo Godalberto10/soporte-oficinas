@@ -286,12 +286,12 @@ def contenido() -> list:
           "prompt no decía el formato exacto, los valores permitidos ni qué es cada servicio. "
           "Lo añadí (generado desde las mismas listas que valida el código) y pasé a "
           "<b>qwen2.5:14b</b>. Estas son las trazas finales, tal cual las imprime "
-          "<font name='Mono'>--traza</font>; coinciden con mis casos 1 y 5."),
+          "<font name='Mono'>--traza</font>; una del dominio y otra fuera de él, como pide el enunciado; coinciden con mis casos 1 y 7."),
         *traza(1, "«no tengo internet» en MAD-01: pide confirmación del reinicio de la vpn "
                   "(respondo «s»)."),
         Spacer(1, 4),
-        *traza(2, "«no puedo entrar en el ERP» en MAD-02: avería en varias oficinas, "
-                  "escalado P1."),
+        *traza(2, "Fuera del dominio, «¿me recomiendas un restaurante…?»: se rechaza sin "
+                  "pasar por más agentes y sin prioridad (el modelo propuso P4)."),
 
         h("8. Forma de trabajo y limitaciones"),
         p("Dirigí a Claude Code con un <b>CLAUDE.md</b> de menos de 200 líneas (contratos, "

@@ -1,15 +1,9 @@
-Final: escalado
-Tipo: acceso_aplicacion · Prioridad: P1
-Escalado: ESC-0001
+Final: rechazado
+Tipo: fuera_de_ambito · Prioridad: -
 
 Respuesta al empleado:
-Tu incidencia se ha escalado a segundo nivel con el identificador ESC-0001 (prioridad P1). Tiempo de primera respuesta: 15 minutos.
+No se tramita la solicitud: la petición no es una incidencia de soporte de oficinas.
 
 Traza:
-   1. [clasificador] respuesta -> {"tipo": "acceso_aplicacion", "prioridad": "P1", "motivo": "El usuario no puede acceder al ERP, un servicio crítico."}
-   2. [diagnostico] respuesta -> {"herramienta": "consultar_servicio", "argumentos": {"servicio": "erp", "oficina": "MAD-02"}}
-   3. [diagnostico] consultar_servicio({"servicio": "erp", "oficina": "MAD-02"}) -> {"servicio": "erp", "oficina": "MAD-02", "estado": "caido"}
-   4. [diagnostico] respuesta -> {"causa": "El servicio ERP está caído en la oficina MAD-02.", "servicio": "erp", "evidencias": ["El servicio ERP está caído en la oficina MAD-02."]}
-   5. [orquestador] nota -> escalado directo: avería multioficina de erp: MAD-02, BCN-01
-   6. [escalado] respuesta -> {"resumen": "El servicio ERP está caído en la oficina MAD-02, afectando el acceso a la aplicación para los usuarios locales.", "probado": ["reiniciar navegador"…
-   7. [escalado] crear_escalado({"ticket": null, "resumen": "El servicio ERP está caído en la oficina MAD-02, afectando el acceso a la aplicación para los usuarios locales.", "prioridad": "P1"}) -> {"escalado": "ESC-0001", "ticket": null, "prioridad": "P1"}
+   1. [clasificador] respuesta -> {"tipo": "fuera_de_ambito", "prioridad": "P4", "motivo": "La solicitud no es una incidencia de soporte técnico relacionada con la red de oficinas."}
+   2. [orquestador] nota -> rechazado: la petición no es una incidencia de soporte de oficinas

@@ -29,6 +29,7 @@ hito; el push lo hago yo.
 `.env` como `HF_TOKEN`; `.env` ignorado por git.
 **Comprobación:** `whoami()` devuelve el usuario sin mostrar el token; el token
 nunca se pegó en el chat.
+**Rechazado:** —
 
 ## Hito 0d — CLAUDE.md
 **Orden lanzada:** pedí a Claude Code un borrador del CLAUDE.md a partir de mis
@@ -174,6 +175,7 @@ petición no es de soporte de oficinas. Para lo segundo se añade el tipo
 Actualizados CLAUDE.md y la orden del hito 5.
 **Riesgo conocido:** detectar `fuera_de_ambito` depende del modelo; un falso
 positivo perdería una incidencia válida.
+**Rechazado:** que una acción que el usuario rechaza termine en `rechazado`: dejaría al empleado sin solución; se escala.
 
 ## Hito 5 — Orquestador y reglas R1–R5
 **Orden lanzada:** `/hito5` (borrador de Claude Code con mi decisión sobre
@@ -235,6 +237,7 @@ defecto en CLAUDE.md (ahora marcado "pendiente de verificar"). Alternativas
 vistas: esperar la renovación mensual, clave propia de un proveedor (p. ej.
 Groq) en los ajustes de Inference Providers, o Ollama local vía `base_url`.
 **Resultado:** `uv run pytest` en verde (239 pruebas).
+**Rechazado:** — (orden lanzada sin cambios).
 
 ## Revisión 1 — CLAUDE.md y permisos
 **Contexto:** el enunciado dice que CLAUDE.md, los permisos, las órdenes y las
@@ -283,6 +286,7 @@ token); el 402 no se reintenta porque es un error permanente.
 `uv run python` podría leer `.env`, pero está en "ask" y lo vería yo.
 **Dudas abiertas:** plataforma de la web (hito 8); créditos de HF para la
 prueba real.
+**Rechazado:** un framework de agentes (no podría explicar el bucle); una página HTML en claude.ai en vez de Streamlit (no ejecutaría mi código Python real ni estaría en el repositorio); el modelo real en la web pública (cualquiera gastaría mis créditos); subir el tope a 15 o bajarlo a 10 (se mantiene 12 hasta medir).
 
 ## Revisión 2 — Órdenes de los hitos 2 a 6
 **Contexto:** las órdenes `hito2.md` a `hito6.md` las redactó Claude Code a
@@ -316,6 +320,7 @@ pública y tiene dos huecos visibles: clasifica "¿me recomiendas un
 restaurante?" como `otro` en vez de `fuera_de_ambito` y no reconoce frases sin
 sus palabras clave ("estoy sin conexión"). Se mejora en el hito 8, antes de
 publicar la web; las reglas de seguridad no cambian porque son del orquestador.
+**Rechazado:** dejar el simulado con sus huecos (lo verá el profesor en la web); empezar por un modelo de HF pequeño y barato (mantengo el de 72B).
 
 ## Hito 7 — Evaluación con mis casos
 **Orden lanzada:** `/hito7`. Sustituye a un borrador anterior de Claude: la
@@ -352,6 +357,7 @@ créditos.
 **Decisiones para el hito 7b:** rechazado sin prioridad (D1); artículo
 `kb-hardware-03`; simulado con más palabras clave, `fuera_de_ambito`, P4 para
 impresoras (D2) y sin citar artículos de otro tipo.
+**Rechazado:** el borrador de casos de Claude (evaluación circular: el mismo autor define el código y lo correcto); evaluar con el modelo real (gastaría créditos); cambiar lo esperado o el código para que los casos pasen.
 
 ## Hito 7b — Arreglos tras la evaluación
 **Orden lanzada:** `/hito7b`, redactada por Claude con mis decisiones sobre
@@ -376,6 +382,7 @@ cite un artículo de otro tipo. `uv run pytest` → 276 en verde.
 **Limitación conocida:** el simulado sigue funcionando por palabras clave; una
 frase sin ninguna conocida puede acabar en `fuera_de_ambito` por error. Con
 el modelo real lo decide el clasificador.
+**Rechazado:** aceptar que un rechazo tenga P4 (opción b de D1); dejar los fallos del simulado como limitación sin arreglarlos.
 
 ## README — orden exacta de ejecución
 **Qué se hizo:** README con instalación (`uv sync`), pruebas, ejecución,
@@ -388,6 +395,7 @@ MAD-01 y el ERP caído en MAD-02 y BCN-01, así que la ajusté. El modelo real s
 explica, pero cada uno usa su propio token en su `.env`: el mío no se entrega.
 **Comprobación:** ejecutadas todas las órdenes del README tal cual; dan lo que
 dice cada comentario.
+**Rechazado:** mis primeros ejemplos (internet en MAD-02, ERP en VAL-01), porque no encajaban con los datos; incluir mi token o mi `.env`.
 
 ## Informe (borrador)
 **Qué se hizo:** `informe.pdf` (3 páginas por ahora) generado con
@@ -400,6 +408,7 @@ mensajes); herramientas y BM25; R1–R5 y permisos; pruebas y mi evaluación
 y limitaciones. Sigue el reparto de puntos del enunciado.
 **Pendiente:** las dos trazas reales (`informe/traza1.txt` y `traza2.txt`)
 cuando haya créditos de HF; el script las inserta solo.
+**Rechazado:** usar la plantilla institucional: el informe va a mi nombre con diseño propio.
 
 ## Hito 6b — Modelo real en local (Ollama) y trazas del informe
 **Problema:** la cuenta de HF daba `402 Payment Required`. Siguiendo lo que
@@ -441,9 +450,34 @@ probó ("reiniciar navegador"). No es peligroso, pero es inexacto.
 **Comprobación:** `uv run pytest` → 289 en verde (sin Ollama ni red). Informe
 regenerado con las dos trazas (4 páginas). Al regenerarlo, `settings.json`
 bloqueó un `rm` de imágenes temporales: el permiso funciona.
+**Rechazado:** pagar créditos de HF; esperar a hablar con el profesor (riesgo con la entrega en dos días); quedarme con las trazas fallidas del 7B (opción b); obligar en código a consultar herramientas (opción b: más riesgo a dos días de la entrega).
 
 ## Informe — revisión mía
 Al leerlo pedí dos cambios: una tabla con las prioridades P1–P4 (criterio,
 ejemplo de los datos y tiempo de primera respuesta) y una sección "Modelos de
 lenguaje" que aclare qué modelo se usa para qué (pruebas, simulado, Ollama
 para las trazas y HF opcional) y por qué no HF. Quedan 4 páginas.
+**Rechazado:** —
+
+## Revisión 3 — Contraste con el enunciado completo
+**Qué hice:** comparé el proyecto con todas las láminas del enunciado.
+**Cumple:** R1–R5, entrega (CLAUDE.md < 200 líneas, README, informe de 4
+páginas, zip sin `.env` que arranca en limpio) y los mínimos del tema 2.
+**Faltaba y corregí:**
+1. R6 pide una traza del dominio y otra fuera de él: las dos eran del dominio.
+   Sustituí la del ERP (guardada en `informe/traza_erp_dominio.txt`) por
+   "¿me recomiendas un restaurante…?" con qwen2.5:14b: rechazado, fuera de
+   ámbito, sin prioridad (mi caso 7).
+2. Varias entradas de este worklog no decían qué se rechazó; añadidas.
+3. Órdenes sin `disable-model-invocation` ni `allowed-tools`, y sin decir qué
+   reviso yo (ver más abajo).
+4. Permisos sin deny sobre `CLAUDE.md` y `.claude/` (ver más abajo).
+**Diferencias que mantengo y por qué:**
+- El hito 0 lo hice a mano (`uv init --package`, permisos y CLAUDE.md), sin
+  una orden `/setup`; no la invento a posteriori.
+- El proyecto está empaquetado (`uv init --package`), aunque la lámina habla
+  de un proyecto sin empaquetar: lo necesita la orden `soporte-oficinas` del
+  README y cambiarlo a dos días de la entrega pone en riesgo el arranque.
+- La acción irreversible es simulada en memoria (no toca ningún sistema real)
+  en vez de escribir en un fichero: así cada ejecución y cada prueba parte del
+  mismo estado.
