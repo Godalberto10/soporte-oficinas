@@ -1,6 +1,6 @@
 # Bitácora
 
-## Hito 0 — Esqueleto del proyecto (2026-10-06)
+## Hito 0 — Esqueleto del proyecto
 **Qué se hizo:** `uv init --package` (soporte_oficinas, Python 3.12); dependencias
 huggingface-hub y python-dotenv; pytest como dependencia de desarrollo;
 carpetas data/, docs/, tests/, .claude/commands/.
@@ -11,7 +11,7 @@ en OneDrive y no admite hardlinks.
 **Solución:** `link-mode = "copy"` en `[tool.uv]` del pyproject.toml.
 **Rechazado:** —
 
-## Hito 0b — Permisos (.claude/settings.json) (2026-10-06)
+## Hito 0b — Permisos (.claude/settings.json)
 **Qué se hizo:** permisos con mínimo privilegio.
 - allow: `uv run pytest`, `git status`, `git diff` (solo leen o prueban).
 - ask: `uv add/remove` (cada dependencia la decido yo), `uv run python` y el
@@ -24,13 +24,13 @@ intentos reales bloqueados por settings.json).
 hito; el push lo hago yo.
 **Rechazado:** —
 
-## Hito 0c — Token de Hugging Face (2026-10-11)
+## Hito 0c — Token de Hugging Face
 **Qué se hizo:** token fine-grained ("Make calls to Inference Providers") en
 `.env` como `HF_TOKEN`; `.env` ignorado por git.
 **Comprobación:** `whoami()` devuelve el usuario sin mostrar el token; el token
 nunca se pegó en el chat.
 
-## Hito 0d — CLAUDE.md (2026-10-11)
+## Hito 0d — CLAUDE.md
 **Orden lanzada:** pedí a Claude Code un borrador del CLAUDE.md a partir de mis
 decisiones: 5 tipos (red, impresora, acceso_aplicacion, correo, hardware + otro),
 prioridad por alcance (P1–P4), críticos vpn/correo/erp/ficheros, horario L-V 08–18.
@@ -41,7 +41,7 @@ ticket reabierto → escalado directo; oficinas MAD-01, MAD-02, BCN-01, VAL-01;
 tope de 12 pasos; 2 respuestas ilegibles seguidas → escalado.
 **Diferencias rechazadas:** ninguna en esta versión (147 líneas, < 200).
 
-## Hito 1 — Datos y documentos (2026-10-11)
+## Hito 1 — Datos y documentos
 **Orden lanzada:** `/hito1` (.claude/commands/hito1.md).
 **Qué se hizo:** `data/servicios.json` (4 oficinas × 7 servicios),
 `data/inventario.json` (14 equipos), `data/tickets.json` (10 tickets);
@@ -65,7 +65,7 @@ falló como se esperaba; tras corregir el dato, `uv run pytest` en verde (45).
 CLAUDE.md y exigen que coincidan con las políticas.
 **Rechazado:** —
 
-## Hito 2 — Orden `/hito2` (2026-10-14)
+## Hito 2 — Orden `/hito2`
 **Orden lanzada:** pedí a Claude Code un borrador de `.claude/commands/hito2.md`
 (estado.py, modelo.py, herramientas.py y sus pruebas) siguiendo el formato de hito1.
 **Decisiones del borrador que acepté:** `ModeloHF` se deja para el hito 6 y
@@ -85,7 +85,7 @@ desde una ruta y aplica los cambios solo en memoria (las pruebas no ensucian
 **Rechazado / aplazado:** `parametros` en el registro (se verá en el hito 4, al
 escribir los prompts) y tipos `Literal` (mejora menor).
 
-## Hito 2 — Estado, modelo simulado y herramientas (2026-10-14)
+## Hito 2 — Estado, modelo simulado y herramientas
 **Orden lanzada:** `/hito2`.
 **Qué se hizo:** `estado.py` (Paso, Accion, Estado, Resultado), `modelo.py`
 (Protocol `Modelo` y `ScriptedModel`, que guarda las llamadas recibidas),
@@ -105,7 +105,7 @@ dos `Red` no comparten datos; la huella SHA-256 de `data/*.json` no cambia
 tras reiniciar, cerrar y escalar.
 **Rechazado:** —
 
-## Hito 3 — Recuperación BM25 y `buscar_docs` (2026-10-14)
+## Hito 3 — Recuperación BM25 y `buscar_docs`
 **Orden lanzada:** borrador de `.claude/commands/hito3.md` escrito por Claude
 Code a petición mía; lo revisé (qué es BM25, para qué sirve el hito, por qué
 no se adelanta un agente) y lancé `/hito3` sin cambios.
@@ -133,7 +133,7 @@ tengo internet"); se mitiga con las expresiones de los empleados en `## Síntoma
 **Rechazado:** adelantar el agente de conocimiento a este hito (se hace al
 empezar el hito 4, junto con el bucle común de los agentes).
 
-## Hito 4 — Agentes (2026-10-14)
+## Hito 4 — Agentes
 **Orden lanzada:** borrador de `.claude/commands/hito4.md` escrito por Claude
 Code a petición mía; antes pedí que me explicara qué hace cada agente y lancé
 `/hito4` sin cambios.
@@ -163,7 +163,7 @@ sin escribir nada; se añadió el código con el editor.
 **Rechazado:** que el clasificador corrija ya la prioridad con los datos (se
 deja al orquestador, que tiene la información de todos los agentes).
 
-## Hito 5 — Orden `/hito5`: decisión sobre `rechazado` (2026-10-14)
+## Hito 5 — Orden `/hito5`: decisión sobre `rechazado`
 **Problema:** CLAUDE.md era ambiguo: con una acción rechazada decía "final
 `escalado` o `rechazado`", pero las reglas de traspaso decían "→ escalado".
 **Decisión mía:** si el usuario rechaza la acción o no le parece bien, se
@@ -175,7 +175,7 @@ Actualizados CLAUDE.md y la orden del hito 5.
 **Riesgo conocido:** detectar `fuera_de_ambito` depende del modelo; un falso
 positivo perdería una incidencia válida.
 
-## Hito 5 — Orquestador y reglas R1–R5 (2026-10-14)
+## Hito 5 — Orquestador y reglas R1–R5
 **Orden lanzada:** `/hito5` (borrador de Claude Code con mi decisión sobre
 `rechazado` y el tipo `fuera_de_ambito`, ver entrada anterior).
 **Qué se hizo:** `orquestador.py` con `orquestar()` (firma de CLAUDE.md más
@@ -202,7 +202,7 @@ acción no la detectaba ninguna: añadí `test_r3_tope_antes_de_ejecutar_la_acci
 **Resultado:** `uv run pytest` en verde (198 pruebas).
 **Rechazado:** —
 
-## Hito 6 — Modelo real y línea de órdenes (2026-10-14)
+## Hito 6 — Modelo real y línea de órdenes
 **Orden lanzada:** `/hito6` (borrador de Claude Code, lanzado sin cambios).
 **Qué se hizo:** en `modelo.py`, `ModeloHF` (InferenceClient, `temperature=0`,
 `max_tokens=512`, token desde `.env` con python-dotenv) y `ModeloSimulado`
@@ -236,7 +236,7 @@ vistas: esperar la renovación mensual, clave propia de un proveedor (p. ej.
 Groq) en los ajustes de Inference Providers, o Ollama local vía `base_url`.
 **Resultado:** `uv run pytest` en verde (239 pruebas).
 
-## Revisión 1 — CLAUDE.md y permisos (2026-10-18)
+## Revisión 1 — CLAUDE.md y permisos
 **Contexto:** el enunciado dice que CLAUDE.md, los permisos, las órdenes y las
 pruebas los escribe el estudiante. Desde el hito 2 había delegado mucha
 redacción en Claude Code, así que reviso todo desde el principio. Método:
@@ -283,3 +283,36 @@ token); el 402 no se reintenta porque es un error permanente.
 `uv run python` podría leer `.env`, pero está en "ask" y lo vería yo.
 **Dudas abiertas:** plataforma de la web (hito 8); créditos de HF para la
 prueba real.
+
+## Revisión 2 — Órdenes de los hitos 2 a 6
+**Contexto:** las órdenes `hito2.md` a `hito6.md` las redactó Claude Code a
+petición mía. Las he revisado una a una: Claude me explicó cada decisión que
+había tomado sin consultarme y yo la acepté o la cambié. Las órdenes se
+quedan como se lanzaron (son el registro de lo que se pidió); lo que cambio
+se aplica en hitos posteriores.
+**Hito 2 — aceptado:** cambios solo en memoria (cada ejecución parte del
+estado inicial; la demo siempre empieza igual); `ejecutar` como único punto
+de llamada con un solo tipo de error (R4); confirmación y guardarraíl en el
+orquestador, no repartidos por las herramientas.
+**Hito 3 — aceptado:** BM25 a mano en vez de librería o embeddings (sin
+dependencias, determinista y explicable), con la limitación de que no entiende
+sinónimos; fragmento = sección, para citas precisas; sin tildes ni palabras
+vacías, raíz ligera y título con peso 3. Valido la tabla de 7 consultas de
+prueba. Aprendido: estas pruebas comprueban una pieza aislada; la web prueba
+el sistema entero y el buscador se ve en la traza y en la cita.
+**Hito 4 — aceptado:** prompt generado por código (nunca anuncia una
+herramienta prohibida); cada agente recibe un resumen de lo averiguado y no la
+conversación entera (menos créditos y menos confusión); el escalado siempre
+termina con id aunque el modelo falle (degradación segura).
+**Hito 5 — aceptado:** la respuesta al empleado la redacta el código con
+plantilla (el modelo no puede prometer plazos falsos) y valido los tiempos
+P1 15 min, P2 30 min, P3 2 h, P4 1 día laborable; la prioridad mínima se
+calcula solo con el servicio diagnosticado; las notas del orquestador no
+cuentan para el tope.
+**Hito 6 — aceptado:** sin terminal para confirmar, la respuesta es "no";
+mantengo `Qwen/Qwen2.5-72B-Instruct` hasta probarlo con créditos.
+**Hito 6 — cambio que decidí:** el `ModeloSimulado` es el que usará la web
+pública y tiene dos huecos visibles: clasifica "¿me recomiendas un
+restaurante?" como `otro` en vez de `fuera_de_ambito` y no reconoce frases sin
+sus palabras clave ("estoy sin conexión"). Se mejora en el hito 8, antes de
+publicar la web; las reglas de seguridad no cambian porque son del orquestador.
