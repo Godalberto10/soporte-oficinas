@@ -521,3 +521,15 @@ con qwen2.5:14b → pregunta → confirmo → resuelto P1.
 **Rechazado:** una página HTML en claude.ai (no ejecuta mi código); repetir la
 ejecución para confirmar (no determinista con un modelo real); el primer
 diseño con emoticonos y degradado; el modelo real en una web pública.
+
+## Permisos finales — candado sobre la especificación
+**Qué hice:** escribí a mano en `.claude/settings.json` el deny de edición y
+escritura sobre `CLAUDE.md`, `.claude/` (permisos y órdenes), `docs/` y
+`data/`, como pide el H0 del enunciado: Claude Code no puede tocar mi
+especificación ni los documentos y datos originales. Lo puse al final porque
+hasta ahora Claude redactaba esos ficheros con mis decisiones.
+**Comprobación:** Claude intentó editar `CLAUDE.md`, crear una orden en
+`.claude/commands/` y un fichero en `docs/`: los tres bloqueados ("denied by
+your permission settings"). Tampoco puede quitarse el candado: `settings.json`
+está dentro de `.claude/`. Si hace falta cambiar algo, lo edito yo.
+**Rechazado:** —
