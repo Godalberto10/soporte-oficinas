@@ -486,3 +486,38 @@ páginas, zip sin `.env` que arranca en limpio) y los mínimos del tema 2.
 cada hito: leer y editar código y `uv run pytest`; en los hitos 7 y 7b,
 además, la tabla de evaluación), y una sección "Qué reviso yo" con lo que
 compruebo en cada hito. Redactado por Claude a partir de esta revisión.
+
+## Hito 8 — Web Streamlit
+**Orden lanzada:** `/hito8`, redactada por Claude con mis decisiones.
+**Qué se hizo:** `app.py` (solo muestra) y `web.py` (lógica sin Streamlit,
+probada); Streamlit en el grupo opcional `web`, para que `uv sync` y
+`uv run pytest` no lo necesiten; temas claro y oscuro en `.streamlit/config.toml`.
+**Decisiones (mías):** texto libre + desplegable de oficina + ticket opcional
+(en una empresa real la oficina saldría del inicio de sesión); botones con mis
+casos de ejemplo; confirmar con botón; modelo simulado por defecto, porque es
+más rápido; un modelo real de Ollama solo si funciona en el equipo, para
+enseñarlo en local en la defensa.
+**Fallos que encontré yo al probarla a mano:**
+1. "Atender incidencia" rompía la página (`StreamlitWidgetAlreadyInstantiatedError`):
+   reescribía los campos del formulario ya dibujados. Prueba que lo reproduce
+   (`test_formulario_escrito_a_mano`) y arreglo con un callback.
+2. "No sé cómo apagar la impresora" daba como procedimiento la sección
+   «Causa» del artículo del atasco. El simulado usaba cualquier sección si no
+   había «Pasos»; ahora solo «Pasos» es procedimiento y, si no hay, se escala.
+**Fallos que salieron al probar el modelo real en la web:**
+3. Confirmar repitiendo la ejecución con la respuesta no sirve con un modelo
+   real: la segunda vez acabó en escalado en lugar de resuelto. Ahora es una
+   sola ejecución en segundo plano que espera al botón, como el [s/N].
+4. Si la ejecución terminaba sin preguntar y se respondía igualmente, se
+   quedaba colgada. `responder` no hace nada si no hay pregunta (con prueba).
+**Diseño (pedido por mí):** sin emoticonos ni degradado, modo claro y oscuro
+seleccionable, un único color de acento (más oscuro en modo oscuro) y una
+explicación de cada final y prioridad, con los mismos textos que
+`guia-prioridades.md` y los mismos tiempos que el orquestador (lo comprueba una prueba).
+**Comprobación:** `uv run pytest` → 315 en verde; las pruebas de la página
+(`test_app.py`, con `streamlit.testing`) se omiten sin el grupo `web` y pasan con
+`uv run --group web pytest`. Modelo real en la web: una ejecución de 98 s
+con qwen2.5:14b → pregunta → confirmo → resuelto P1.
+**Rechazado:** una página HTML en claude.ai (no ejecuta mi código); repetir la
+ejecución para confirmar (no determinista con un modelo real); el primer
+diseño con emoticonos y degradado; el modelo real en una web pública.

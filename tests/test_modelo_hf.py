@@ -231,3 +231,16 @@ def test_hf_no_envia_modelo_en_cada_llamada():
 def test_cli_crea_modelo_ollama():
     assert isinstance(cli._crear_modelo("ollama"), ModeloOllama)
     assert isinstance(cli._crear_modelo("simulado"), ModeloSimulado)
+
+
+def test_simulado_solo_da_procedimiento_desde_una_seccion_pasos():
+    """Fallo encontrado por Alberto en la web: respondía con la sección «Causa»."""
+    contexto = {"incidencia": "no sé cómo apagar la impresora", "oficina": "MAD-01",
+                "averiguado": {"tipo": "impresora", "causa": "impresion ok"}}
+    observacion = {"fragmentos": [{"doc": "docs/kb-impresora-01.md", "seccion": "Causa",
+                                   "texto": "Fallo físico de la impresora."}]}
+    mensajes = [{"role": "user", "content": json.dumps(contexto)},
+                {"role": "assistant", "content": "{}"},
+                {"role": "user", "content": "Observación: " + json.dumps(observacion)}]
+    datos = ModeloSimulado()._conocimiento(contexto, 1, mensajes)
+    assert datos["procedimiento"] is None and datos["citas"] == []

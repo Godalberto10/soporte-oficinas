@@ -26,3 +26,6 @@ link-mode = "copy"
 dev = [
     "pytest>=9.1.1",
 ]
+web = [
+    "streamlit>=1.66.0",
+]

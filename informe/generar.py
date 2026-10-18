@@ -311,7 +311,8 @@ def contenido() -> list:
         ),
         Spacer(1, 3),
         p("<b>Reproducir:</b> <font name='Mono'>uv sync</font> · <font name='Mono'>uv run "
-          "pytest</font> · órdenes del README (modelo simulado por defecto, sin token)."),
+          "pytest</font> · órdenes del README (modelo simulado por defecto, sin token). Web opcional: "
+          "<font name='Mono'>uv run --group web streamlit run app.py</font>."),
     ]
     return c
 

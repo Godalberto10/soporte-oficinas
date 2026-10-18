@@ -178,9 +178,10 @@ class ModeloSimulado:
             return {"herramienta": "buscar_docs", "argumentos": {"consulta": consulta, "k": 5}}
         fragmentos = _de_su_tipo(_ultima_observacion(mensajes).get("fragmentos", []),
                                  averiguado.get("tipo", ""))
-        if not fragmentos:
+        pasos = [f for f in fragmentos if f["seccion"] == "Pasos"]  # solo «Pasos» es procedimiento
+        if not pasos:
             return {"procedimiento": None, "citas": [], "accion": None}
-        elegido = next((f for f in fragmentos if f["seccion"] == "Pasos"), fragmentos[0])
+        elegido = pasos[0]
         servicio, causa = averiguado.get("servicio"), averiguado.get("causa", "")
         accion = None
         if servicio and ("caido" in causa or "degradado" in causa):

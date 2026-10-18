@@ -13,7 +13,7 @@ pasa ahora (escalado, su id y el tiempo de respuesta).
 ## Entorno y órdenes
 - Python 3.12, uv. Sin frameworks de agentes (ni LangGraph ni LangChain).
 - Dependencias permitidas: `huggingface-hub`, `python-dotenv`; dev: `pytest`;
-  `streamlit` solo para `app.py` (hito 8).
+  `streamlit` solo para `app.py`, en el grupo opcional `web` (hito 8).
   Cualquier otra se pide antes (`uv add` está en ask).
 - Ejecutar: `uv run soporte-oficinas "<incidencia>" --oficina MAD-01 [--ticket T-0007] [--modelo simulado|hf|ollama]`
 - Pruebas: `uv run pytest` — sin red y sin `HF_TOKEN`.
@@ -30,6 +30,9 @@ src/soporte_oficinas/
   agentes.py       clasificador, diagnostico, conocimiento, escalado
   orquestador.py   orquestar(): traspaso, tope de pasos, guardarraíles
   cli.py           main() de la orden soporte-oficinas
+  evaluacion.py    mis casos de evaluación y la tabla del informe
+  web.py           lógica de la web sin Streamlit (Ejecucion, explicaciones)
+app.py             web Streamlit (capa fina) · .streamlit/config.toml: temas
 data/   inventario.json, servicios.json, tickets.json
 docs/   base de conocimiento en Markdown (ver "Documentos")
 tests/  pruebas pytest con ScriptedModel
@@ -154,14 +157,13 @@ Cada herramienta tiene `descripcion` en el registro; devuelve dict o lanza
   Los casos y su resultado esperado los defino yo sin mirar el código
   (oráculo independiente).
 
-## Interfaz web (último hito)
-Streamlit en `app.py`, arranque `uv run streamlit run app.py`. Solo llama a
-`orquestar()`; `confirmar` es un botón. Sin lógica de agentes en la web.
-Se publica con un enlace para que el profesor la pruebe sin descargar nada;
-el token, si se usa, va en los secretos del servidor, nunca en el código.
-La web pública usa solo el modelo simulado: cualquiera con el enlace gastaría
-mis créditos de HF. El modelo real solo se enseña en local.
-Plataforma (Streamlit Cloud o HF Spaces): se decide en el hito 8.
+## Interfaz web (hito 8)
+Streamlit en `app.py`: `uv run --group web streamlit run app.py`. Solo llama a
+`web.py` y `orquestar()`; sin lógica de agentes. `confirmar` es un botón: la
+ejecución corre en segundo plano y espera la respuesta (una sola ejecución,
+como el [s/N] de la terminal). Modelo simulado por defecto; los modelos de
+Ollama aparecen solo si Ollama funciona en el equipo. Temas claro y oscuro.
+Si se publica, solo con el simulado: nunca un token en el servidor ni en el código.
 
 ## Forma de trabajar
 - Un hito por orden en `.claude/commands/`; no se adelanta trabajo de otro hito.

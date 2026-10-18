@@ -48,6 +48,16 @@ uv run soporte-oficinas "no puedo entrar en el ERP" --oficina MAD-02 --traza
 uv run soporte-oficinas "la impresora no imprime" --oficina MAD-02 --ticket T-0007 --traza
 ```
 
+## Web (opcional)
+```
+uv run --group web streamlit run app.py
+```
+Se abre en http://localhost:8501. Casos de ejemplo a un clic, botones para
+confirmar o rechazar la acción irreversible, la traza de cada agente y una guía
+de prioridades. Usa el modelo simulado (sin token); si Ollama funciona en el
+equipo, también permite elegir un modelo real. Modo claro u oscuro en el menú
+⋮ → Settings. `uv sync` no instala Streamlit: solo lo hace `--group web`.
+
 ## Evaluación
 ```
 uv run python -m soporte_oficinas.evaluacion                     # con guion
@@ -84,7 +94,8 @@ Cada incidencia hace unas 5–10 llamadas al modelo y gasta créditos de la cuen
 ## Estructura
 ```
 src/soporte_oficinas/   estado, modelo, herramientas, recuperacion (BM25),
-                        agentes, orquestador, evaluacion, cli
+                        agentes, orquestador, evaluacion, cli, web
+app.py                  web Streamlit (opcional)
 data/                   estado simulado: servicios, inventario, tickets
 docs/                   base de conocimiento (artículos kb-* y políticas)
 tests/                  pruebas pytest

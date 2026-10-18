@@ -1,0 +1,25 @@
+# Dos temas (claro y oscuro): el selector de Streamlit (menú ⋮ → Settings) sigue
+# funcionando. Un único color de acento, el del informe.
+
+[theme.light]
+primaryColor = "#0F5E59"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F4F6F8"
+textColor = "#1B2A41"
+borderColor = "#E2E6EB"
+showWidgetBorder = true
+baseRadius = "0.6rem"
+headingFont = "serif"
+
+[theme.dark]
+primaryColor = "#2A8C7F"
+backgroundColor = "#0F1720"
+secondaryBackgroundColor = "#17212B"
+textColor = "#E6EDF3"
+borderColor = "#2A3642"
+showWidgetBorder = true
+baseRadius = "0.6rem"
+headingFont = "serif"
+
+[browser]
+gatherUsageStats = false
