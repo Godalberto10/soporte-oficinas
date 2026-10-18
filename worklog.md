@@ -72,7 +72,7 @@ CLAUDE.md y exigen que coincidan con las políticas.
 `buscar_docs` para el hito 3 (no adelantar hitos); clase `Red` que carga los JSON
 desde una ruta y aplica los cambios solo en memoria (las pruebas no ensucian
 `data/`); confirmación y guardarraíl fuera de las herramientas (son del orquestador).
-**Mejoras que pedí y acepté tras revisarlo:**
+**Mejoras que propuso Claude y acepté tras revisarlo:**
 1. `crear_herramientas(red)` conserva las firmas de CLAUDE.md, y `ejecutar(...)`
    es el único punto de llamada: herramienta inexistente o argumentos mal formados
    → `ErrorHerramienta`, comprobando la firma con `inspect.signature().bind` para
@@ -122,8 +122,8 @@ Por qué BM25 y no embeddings: sin dependencias ni red, determinista y explicabl
 `politica-reinicios.md` por muy poco (×1,02 frente a `kb-impresora-02.md`,
 que también habla de reiniciar en horario laboral) y "reinicio" ≠ "reiniciar".
 **Solución:** reducción a raíz ligera (sin plural ni vocal final, 6 letras) y
-título con peso 3. Probé 12 combinaciones (longitud de raíz × peso) sobre 12
-consultas y elegí la de mayor margen mínimo: ahora ×1,27 y ×1,46. Nueva prueba
+título con peso 3. Claude probó 12 combinaciones (longitud de raíz × peso) sobre
+12 consultas y acepté la de mayor margen mínimo: ahora ×1,27 y ×1,46. Nueva prueba
 `test_margen_politica_reinicios` (exige ≥ 1,2; con el código anterior fallaba).
 **Coste aceptado:** "tiempos de respuesta por prioridad" baja de ×2,3 a ×1,17
 porque "tiempo" coincide con `procedimiento-escalado.md`; sigue acertando.
@@ -194,7 +194,7 @@ el mensaje inicial y `asegurar_escalado` pública. Pruebas en `test_orquestador.
   reinicio por servicio siempre, y solo se cierra el ticket de la incidencia.
 - Si el agente escalado no responde bien, el código crea el escalado con un
   resumen automático: siempre hay id.
-**Comprobación con mutaciones:** rompí a propósito cada regla (R1 sin
+**Comprobación con mutaciones:** Claude rompió a propósito cada regla (R1 sin
 confirmar, R2 sin guardarraíl, R3 sin tope antes de la acción, R4 sin escalar
 ilegibles, R5 sin comprobar citas, prioridad sin subir, reabierto sin escalar)
 y comprobé que fallan pruebas. La comprobación del tope antes de ejecutar la
