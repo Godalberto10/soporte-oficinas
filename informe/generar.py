@@ -16,7 +16,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import (KeepTogether, Paragraph, Preformatted, SimpleDocTemplate,
+from reportlab.platypus import (KeepTogether, PageBreak, Paragraph, Preformatted, SimpleDocTemplate,
                                 Spacer, Table, TableStyle)
 
 RAIZ = Path(__file__).resolve().parents[1]
@@ -50,7 +50,7 @@ E = {
                             textColor=TINTA),
     "celda-b": ParagraphStyle("celda-b", fontName="Texto-B", fontSize=8.8, leading=11,
                               textColor=colors.white),
-    "mono": ParagraphStyle("mono", fontName="Mono", fontSize=6.9, leading=8.4,
+    "mono": ParagraphStyle("mono", fontName="Mono", fontSize=7.4, leading=9,
                            textColor=TINTA),
     "nota": ParagraphStyle("nota", fontName="Texto-I", fontSize=8.5, leading=11,
                            textColor=GRIS),
@@ -102,9 +102,8 @@ def traza(n: int, titulo: str) -> list:
         texto = crudo.decode("utf-16" if crudo[:2] in (b"\xff\xfe", b"\xfe\xff")
                              else "utf-8-sig").strip()
         return [KeepTogether([cabecera, recuadro(Preformatted(texto, E["mono"],
-                                                              maxLineLength=150))])]
-    aviso = ("Pendiente: se ejecutará con el modelo real (<font name='Mono'>--modelo hf "
-             "--traza</font>) cuando la cuenta de Hugging Face tenga créditos.")
+                                                              maxLineLength=108, newLineChars="      "))])]
+    aviso = ("Pendiente: se ejecutará con <font name='Mono'>--modelo ollama --traza</font>.")
     return [cabecera, recuadro(Paragraph(aviso, E["nota"]))]
 
 
@@ -240,12 +239,23 @@ def contenido() -> list:
           "arreglos: <b>11/11 y 9/9</b>."),
 
         h("6. Dos trazas reales"),
-        *traza(1, "«no tengo internet» en MAD-01 con el modelo real: pide confirmación del "
-                  "reinicio de la vpn."),
+        p("Hugging Face ya no da créditos gratuitos (dos cuentas devolvieron <i>402 Payment "
+          "Required</i>), así que, como indicó el profesor, usé un modelo real en local con "
+          "<b>Ollama</b> (<font name='Mono'>--modelo ollama</font>), con el mismo código y "
+          "las mismas reglas. Con <b>qwen2.5:7b</b> las primeras trazas acabaron escaladas: el "
+          "modelo devolvía JSON fuera de contrato (R4), no consultaba herramientas y se "
+          "inventaba citas (R5 las eliminó). Las reglas evitaron cualquier daño, pero el "
+          "prompt no decía el formato exacto, los valores permitidos ni qué es cada servicio. "
+          "Lo añadí (generado desde las mismas listas que valida el código) y pasé a "
+          "<b>qwen2.5:14b</b>. Estas son las trazas finales, tal cual las imprime "
+          "<font name='Mono'>--traza</font>; coinciden con mis casos 1 y 5."),
+        *traza(1, "«no tengo internet» en MAD-01: pide confirmación del reinicio de la vpn "
+                  "(respondo «s»)."),
         Spacer(1, 4),
-        *traza(2, "«no puedo entrar en el ERP» en MAD-02 con el modelo real: avería en varias "
-                  "oficinas, escalado P1."),
+        *traza(2, "«no puedo entrar en el ERP» en MAD-02: avería en varias oficinas, "
+                  "escalado P1."),
 
+        PageBreak(),
         h("7. Forma de trabajo y limitaciones"),
         p("Dirigí a Claude Code con un <b>CLAUDE.md</b> de menos de 200 líneas (contratos, "
           "reglas y valores cerrados), permisos de mínimo privilegio y <b>una orden por "
@@ -258,7 +268,9 @@ def contenido() -> list:
             "clasificarse mal. Con el modelo real decide el clasificador.",
             "R5 comprueba que la cita se recuperó, no que sea relevante.",
             "BM25 no entiende sinónimos; con más documentos convendría una búsqueda híbrida.",
-            "El tope de 12 pasos se ajustará tras medir el modelo real.",
+            "Con un modelo real pequeño, el agente de escalado puede listar en «probado» "
+            "cosas que nadie probó; no es peligroso, pero sí inexacto.",
+            "El tope de 12 pasos bastó con el modelo real (9 pasos en la traza más larga).",
         ),
         Spacer(1, 3),
         p("<b>Reproducir:</b> <font name='Mono'>uv sync</font> · <font name='Mono'>uv run "

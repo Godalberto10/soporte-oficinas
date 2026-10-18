@@ -1,0 +1,15 @@
+Final: escalado
+Tipo: red · Prioridad: P2
+Escalado: ESC-0001
+
+Respuesta al empleado:
+Tu incidencia se ha escalado a segundo nivel con el identificador ESC-0001 (prioridad P2). Tiempo de primera respuesta: 30 minutos.
+
+Traza:
+   1. [clasificador] respuesta -> {"tipo": "red", "prioridad": "P2", "motivo": "Falta de conexión a internet en la oficina MAD-01"}
+   2. [diagnostico] respuesta -> {"causa": "hubo un fallo en el enrutamiento", "servicio": "wifi_invitados", "evidencias": ["El estado del servicio wifi_invitados en MAD-01 es caido", "No hay t…
+   3. [conocimiento] respuesta -> {"procedimiento": "Verifique que el enrutamiento esté configurado correctamente y que no haya conflictos de IP. Si el problema persiste, intente reiniciar el en…
+   4. [orquestador] nota -> citas eliminadas por no haberse recuperado: docs/red.md#configuracion-enrutamiento, docs/red.md#reinicio-enrutador
+   5. [orquestador] nota -> sin procedimiento con citas válidas: se escala
+   6. [escalado] respuesta -> {"resumen": "Problema de internet en MAD-01, hubo un fallo en el enrutamiento", "probado": ["Verificar configuración del enrutamiento", "Reiniciar el enrutador"…
+   7. [escalado] crear_escalado({"ticket": null, "resumen": "Problema de internet en MAD-01, hubo un fallo en el enrutamiento", "prioridad": "P2"}) -> {"escalado": "ESC-0001", "ticket": null, "prioridad": "P2"}

@@ -400,3 +400,44 @@ mensajes); herramientas y BM25; R1–R5 y permisos; pruebas y mi evaluación
 y limitaciones. Sigue el reparto de puntos del enunciado.
 **Pendiente:** las dos trazas reales (`informe/traza1.txt` y `traza2.txt`)
 cuando haya créditos de HF; el script las inserta solo.
+
+## Hito 6b — Modelo real en local (Ollama) y trazas del informe
+**Problema:** la cuenta de HF daba `402 Payment Required`. Siguiendo lo que
+dijo el profesor en clase (más cuentas u Ollama), creé una segunda cuenta con
+un token fine-grained de solo inferencia: también `402 … no remaining
+credits`. HF ya no da créditos gratuitos, así que más cuentas no sirven.
+**Decisión (mía):** Ollama en local, sin pagar. Comprobé antes que mi equipo
+puede (31 GB de RAM, RTX 3050 Ti, 388 GB libres) y que el profesor no lo
+necesita: pruebas, README y web usan el simulado; Ollama es opcional.
+**Orden lanzada:** `/hito6b`, redactada por Claude con mis decisiones.
+`ModeloOllama` reutiliza `ModeloHF` (mismo protocolo, `temperature=0`,
+reintentos) contra `localhost`, sin token; `--modelo ollama`. HF queda intacto.
+**Primera prueba real (qwen2.5:7b):** las dos trazas acabaron escaladas. El
+modelo devolvía JSON fuera de contrato (servicio inexistente, evidencias como
+texto) → R4 escaló tras 2 ilegibles; no consultaba herramientas; y se inventó
+citas (`docs/red.md#…`) → R5 las eliminó. Las reglas evitaron cualquier daño,
+pero el sistema no resolvía nada. Guardadas en `informe/traza*_antes.txt` y
+`informe/traza1_7b_prompt_mejorado.txt`.
+**Causa:** el prompt no decía el formato exacto, los valores permitidos, que
+hay que consultar antes de concluir, qué es cada servicio (el modelo eligió
+`wifi_invitados` para "no tengo internet") ni que conocimiento debe empezar
+por `buscar_docs`. Lo había previsto en el hito 4 (prompts "secos").
+**Solución (decidida por mí, opción a):** el prompt de cada agente incluye su
+formato exacto generado desde las mismas listas que valida el código; el
+diagnóstico recibe la descripción de los servicios (igual que el catálogo, lo
+comprueba una prueba) y conocimiento busca siempre primero. La validación en
+código no cambia: la seguridad sigue sin depender del prompt. Con el 7B
+mejoró el formato pero seguía sin usar herramientas; pasé a qwen2.5:14b.
+**Prueba ajustada (explicado):** `test_prompt_conocimiento_separa_proponibles`
+buscaba "reiniciar_servicio" en todo el prompt; ahora aparece legítimamente
+en el formato de `accion`. Se limita a la lista de herramientas llamables, que
+era lo que quería comprobar; la regla no cambia.
+**Resultado con qwen2.5:14b:** traza 1 ("no tengo internet", MAD-01): consulta
+la vpn, sube P2→P1, busca y cita kb-red-01, propone el reinicio, confirmo y
+resuelto (C-D-K): mi caso 1. Traza 2 (ERP, MAD-02): consulta el erp, el código
+detecta la avería en MAD-02 y BCN-01 y escala con P1 (C-D-E): mi caso 5.
+**Limitación vista:** el agente de escalado pone en "probado" cosas que nadie
+probó ("reiniciar navegador"). No es peligroso, pero es inexacto.
+**Comprobación:** `uv run pytest` → 289 en verde (sin Ollama ni red). Informe
+regenerado con las dos trazas (4 páginas). Al regenerarlo, `settings.json`
+bloqueó un `rm` de imágenes temporales: el permiso funciona.

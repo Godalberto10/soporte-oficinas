@@ -8,7 +8,9 @@ import pytest
 
 from soporte_oficinas import modelo as modulo_modelo
 from soporte_oficinas.herramientas import Red
-from soporte_oficinas.modelo import MODELO_POR_DEFECTO, ModeloHF, ModeloSimulado
+from soporte_oficinas import cli
+from soporte_oficinas.modelo import (MODELO_POR_DEFECTO, OLLAMA_MODELO_POR_DEFECTO, ModeloHF,
+                                     ModeloOllama, ModeloSimulado)
 from soporte_oficinas.orquestador import orquestar, trayectoria
 
 LUNES_10 = datetime(2026, 10, 12, 10, 0)
@@ -21,6 +23,7 @@ def sin_env_real(monkeypatch):
     monkeypatch.setattr(modulo_modelo, "load_dotenv", lambda *a, **k: False)
     monkeypatch.delenv("HF_TOKEN", raising=False)
     monkeypatch.delenv("HF_MODEL", raising=False)
+    monkeypatch.delenv("OLLAMA_MODEL", raising=False)
 
 
 def respuesta(texto: str):
@@ -195,3 +198,36 @@ def test_simulado_no_cita_articulos_de_otro_tipo():
                 {"role": "user", "content": "Observación: " + json.dumps(observacion)}]
     datos = ModeloSimulado()._conocimiento(contexto, 1, mensajes)
     assert datos["procedimiento"] is None and datos["citas"] == []
+
+
+# --- Hito 6b: ModeloOllama (cliente falso: no hace falta Ollama instalado) -------
+
+def test_ollama_sin_token_envia_el_modelo():
+    cliente = ClienteFalso(texto='{"tipo": "red"}')
+    texto = ModeloOllama(cliente=cliente).generar("eres el clasificador", [])
+    assert texto == '{"tipo": "red"}'
+    llamada = cliente.llamadas[0]
+    assert llamada["model"] == OLLAMA_MODELO_POR_DEFECTO
+    assert llamada["temperature"] == 0 and llamada["max_tokens"] == 512
+
+
+def test_ollama_modelo_configurable(monkeypatch):
+    monkeypatch.setenv("OLLAMA_MODEL", "llama3.1:8b")
+    assert ModeloOllama(cliente=ClienteFalso()).modelo == "llama3.1:8b"
+
+
+def test_ollama_reintenta_como_hf():
+    cliente = ClienteFalso(fallos=1)
+    ModeloOllama(cliente=cliente).generar("s", [])
+    assert len(cliente.llamadas) == 2
+
+
+def test_hf_no_envia_modelo_en_cada_llamada():
+    cliente = ClienteFalso()
+    ModeloHF(cliente=cliente).generar("s", [])
+    assert "model" not in cliente.llamadas[0]
+
+
+def test_cli_crea_modelo_ollama():
+    assert isinstance(cli._crear_modelo("ollama"), ModeloOllama)
+    assert isinstance(cli._crear_modelo("simulado"), ModeloSimulado)

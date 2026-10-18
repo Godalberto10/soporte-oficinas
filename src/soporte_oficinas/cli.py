@@ -6,7 +6,7 @@ import sys
 from collections.abc import Callable
 
 from soporte_oficinas.estado import Accion, Paso, Resultado
-from soporte_oficinas.modelo import Modelo, ModeloHF, ModeloSimulado
+from soporte_oficinas.modelo import Modelo, ModeloHF, ModeloOllama, ModeloSimulado
 from soporte_oficinas.orquestador import orquestar
 
 RESPUESTAS_SI = {"s", "si", "sí"}
@@ -20,8 +20,9 @@ def _argumentos() -> argparse.ArgumentParser:
     parser.add_argument("incidencia", help="texto de la incidencia del empleado")
     parser.add_argument("--oficina", required=True, help="MAD-01, MAD-02, BCN-01 o VAL-01")
     parser.add_argument("--ticket", help="id del ticket, p. ej. T-0007")
-    parser.add_argument("--modelo", choices=["simulado", "hf"], default="simulado",
-                        help="simulado (sin token, por defecto) o hf (Hugging Face)")
+    parser.add_argument("--modelo", choices=["simulado", "hf", "ollama"], default="simulado",
+                        help="simulado (sin token, por defecto), hf (Hugging Face) "
+                             "u ollama (modelo local)")
     parser.add_argument("--traza", action="store_true", help="muestra los pasos")
     return parser
 
@@ -61,7 +62,8 @@ def formatear(resultado: Resultado, traza: bool = False) -> str:
 
 
 def _crear_modelo(nombre: str) -> Modelo:
-    return ModeloHF() if nombre == "hf" else ModeloSimulado()
+    modelos = {"hf": ModeloHF, "ollama": ModeloOllama}
+    return modelos.get(nombre, ModeloSimulado)()
 
 
 def main(argv: list[str] | None = None, entrada: Callable[[str], str] = input) -> int:

@@ -1,11 +1,14 @@
 """Pruebas del bucle común de agente y de los cuatro agentes."""
 
 import json
+from pathlib import Path
 
 import pytest
 
 from soporte_oficinas.agentes import (
     AGENTES,
+    SERVICIOS,
+    TIPOS,
     ejecutar_agente,
     extraer_json,
     prompt_sistema,
@@ -83,7 +86,8 @@ def test_prompt_solo_herramientas_permitidas(nombre, h):
 
 def test_prompt_conocimiento_separa_proponibles(h):
     prompt = prompt_sistema(AGENTES["conocimiento"], h)
-    llamables, proponibles = prompt.split("Acciones que puedes proponer")
+    resto, proponibles = prompt.split("Acciones que puedes proponer")
+    llamables = resto.split("Herramientas que puedes llamar")[1]  # solo la lista
     assert "buscar_docs(consulta: str, k: int = 3)" in llamables
     assert "reiniciar_servicio" not in llamables
     assert "reiniciar_servicio(servicio: str, oficina: str)" in proponibles
@@ -303,3 +307,36 @@ def test_mensajes_llevan_contexto_y_observaciones(estado, h):
     assert [m["role"] for m in segunda] == ["user", "assistant", "user"]
     assert "kb-red-01.md" in segunda[-1]["content"]
     assert "conocimiento" in modelo.llamadas[0]["sistema"]
+
+
+# --- Tras la prueba con el modelo real: formato exacto en el prompt --------------
+
+@pytest.mark.parametrize("nombre", sorted(AGENTES))
+def test_prompt_incluye_formato_exacto(nombre, h):
+    prompt = prompt_sistema(AGENTES[nombre], h)
+    assert AGENTES[nombre].formato and AGENTES[nombre].formato in prompt
+
+
+def test_prompt_diagnostico_valores_y_listas(h):
+    prompt = prompt_sistema(AGENTES["diagnostico"], h)
+    assert all(s in prompt for s in SERVICIOS)
+    assert '"evidencias": ["<texto>"' in prompt
+    assert "consulta al menos una herramienta" in prompt
+
+
+def test_prompt_clasificador_tipos_permitidos(h):
+    prompt = prompt_sistema(AGENTES["clasificador"], h)
+    assert "|".join(sorted(TIPOS)) in prompt
+
+
+def test_descripcion_servicios_igual_que_el_catalogo():
+    catalogo = (Path(__file__).resolve().parents[1] / "docs" / "catalogo-servicios.md"
+                ).read_text(encoding="utf-8")
+    assert set(agentes.DESCRIPCION_SERVICIOS) == SERVICIOS
+    for servicio, descripcion in agentes.DESCRIPCION_SERVICIOS.items():
+        assert f"| `{servicio}` | {descripcion} |" in catalogo
+
+
+def test_prompt_conocimiento_busca_primero(h):
+    assert "primer turno es SIEMPRE una llamada a buscar_docs" in prompt_sistema(
+        AGENTES["conocimiento"], h)

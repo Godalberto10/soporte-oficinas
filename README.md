@@ -27,7 +27,7 @@ Sin red y sin token: usan un modelo con respuestas fijadas (`ScriptedModel`).
 
 ## Ejecución
 ```
-uv run soporte-oficinas "<incidencia>" --oficina <MAD-01|MAD-02|BCN-01|VAL-01> [--ticket T-NNNN] [--modelo simulado|hf] [--traza]
+uv run soporte-oficinas "<incidencia>" --oficina <MAD-01|MAD-02|BCN-01|VAL-01> [--ticket T-NNNN] [--modelo simulado|ollama|hf] [--traza]
 ```
 Por defecto usa el modelo simulado (sin token). `--traza` muestra cada paso de
 cada agente. Si hay que reiniciar un servicio, el programa pregunta `[s/N]`.
@@ -54,6 +54,18 @@ uv run python -m soporte_oficinas.evaluacion                     # con guion
 uv run python -m soporte_oficinas.evaluacion --modelo simulado   # con el simulado
 ```
 Imprime la tabla de casos (resultado y trayectoria esperados frente a obtenidos).
+
+## Modelo real en local (Ollama), opcional
+Gratis, sin token ni créditos. Es el que se usó para las trazas del informe.
+1. Instala [Ollama](https://ollama.com/download) y descarga el modelo:
+   ```
+   ollama pull qwen2.5:7b
+   ```
+2. Con Ollama abierto, ejecuta con `--modelo ollama`, por ejemplo:
+   ```
+   uv run soporte-oficinas "no tengo internet" --oficina MAD-01 --modelo ollama --traza
+   ```
+   Opcional: `OLLAMA_MODEL=<modelo>` y `OLLAMA_URL=<url>` en el entorno o en `.env`.
 
 ## Modelo real (Hugging Face), opcional
 1. Crea un token en Hugging Face con permiso "Make calls to Inference Providers".

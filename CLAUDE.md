@@ -15,7 +15,7 @@ pasa ahora (escalado, su id y el tiempo de respuesta).
 - Dependencias permitidas: `huggingface-hub`, `python-dotenv`; dev: `pytest`;
   `streamlit` solo para `app.py` (hito 8).
   Cualquier otra se pide antes (`uv add` está en ask).
-- Ejecutar: `uv run soporte-oficinas "<incidencia>" --oficina MAD-01 [--ticket T-0007] [--modelo simulado|hf]`
+- Ejecutar: `uv run soporte-oficinas "<incidencia>" --oficina MAD-01 [--ticket T-0007] [--modelo simulado|hf|ollama]`
 - Pruebas: `uv run pytest` — sin red y sin `HF_TOKEN`.
 - El token se lee de `.env` (`HF_TOKEN`) con python-dotenv. Nunca se lee,
   imprime ni copia `.env`; nunca aparece una clave en el código.
@@ -24,7 +24,7 @@ pasa ahora (escalado, su id y el tiempo de respuesta).
 ```
 src/soporte_oficinas/
   estado.py        Estado, Paso, Accion, Resultado (dataclasses)
-  modelo.py        Protocolo Modelo, ScriptedModel, ModeloSimulado, ModeloHF
+  modelo.py        Protocolo Modelo, ScriptedModel, ModeloSimulado, ModeloHF, ModeloOllama
   herramientas.py  herramientas + registro con descripción y reversible
   recuperacion.py  índice BM25 propio sobre docs/
   agentes.py       clasificador, diagnostico, conocimiento, escalado
@@ -46,9 +46,13 @@ class Modelo(Protocol):
   (`--modelo simulado`, por defecto). No aplica reglas de seguridad: las aplica
   siempre el orquestador.
 - `ModeloHF`: `huggingface_hub.InferenceClient`, modelo en `HF_MODEL`
-  (por defecto `Qwen/Qwen2.5-72B-Instruct`, **pendiente de verificar**: la
-  cuenta se quedó sin créditos, 402), `temperature=0`, `max_tokens=512`.
+  (por defecto `Qwen/Qwen2.5-72B-Instruct`, sin verificar: HF ya no da créditos
+  gratuitos, 402), `temperature=0`, `max_tokens=512`.
   Reintenta 1 vez solo fallos transitorios (red, 429, 5xx); nunca muestra el token.
+- `ModeloOllama`: igual que `ModeloHF` pero contra Ollama en local
+  (`OLLAMA_URL`, por defecto `http://localhost:11434/v1`; `OLLAMA_MODEL`, por
+  defecto `qwen2.5:7b`, ligero). Sin token ni créditos. Las trazas del informe
+  se sacaron con `OLLAMA_MODEL=qwen2.5:14b`.
 - Todo agente pide al modelo **un único objeto JSON** con las claves de su contrato.
 
 ## Agentes (rol · salida JSON · herramientas permitidas)

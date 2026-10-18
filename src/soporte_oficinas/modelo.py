@@ -11,6 +11,8 @@ from huggingface_hub import InferenceClient
 from soporte_oficinas.recuperacion import tokenizar
 
 MODELO_POR_DEFECTO = "Qwen/Qwen2.5-72B-Instruct"
+OLLAMA_MODELO_POR_DEFECTO = "qwen2.5:7b"
+OLLAMA_URL_POR_DEFECTO = "http://localhost:11434/v1"
 INTENTOS = 2
 
 
@@ -50,6 +52,7 @@ class ModeloHF:
                                    "(HF_TOKEN=...) o usa --modelo simulado")
             cliente = InferenceClient(model=self.modelo, token=self._token)
         self._cliente = cliente
+        self._extra: dict[str, str] = {}
 
     def _sin_token(self, texto: str) -> str:
         return texto.replace(self._token, "***") if self._token else texto
@@ -60,7 +63,7 @@ class ModeloHF:
         for intento in range(1, INTENTOS + 1):
             try:
                 respuesta = self._cliente.chat_completion(
-                    messages=completos, temperature=0, max_tokens=512)
+                    messages=completos, temperature=0, max_tokens=512, **self._extra)
                 return respuesta.choices[0].message.content or ""
             except Exception as error:  # red o proveedor
                 if intento == INTENTOS or not es_transitorio(error):
@@ -68,6 +71,18 @@ class ModeloHF:
                     raise RuntimeError(f"el modelo {self.modelo} no respondió tras "
                                        f"{intento} intento(s) ({motivo})") from None
         raise AssertionError("inalcanzable")
+
+
+class ModeloOllama(ModeloHF):
+    """Modelo real en local con Ollama: mismo protocolo que HF, sin token ni créditos."""
+
+    def __init__(self, modelo: str | None = None, cliente: Any = None) -> None:
+        load_dotenv()
+        self.modelo = modelo or os.environ.get("OLLAMA_MODEL") or OLLAMA_MODELO_POR_DEFECTO
+        self._token = None
+        url = os.environ.get("OLLAMA_URL") or OLLAMA_URL_POR_DEFECTO
+        self._cliente = cliente or InferenceClient(base_url=url)
+        self._extra = {"model": self.modelo}  # Ollama necesita el modelo en cada llamada
 
 
 def es_transitorio(error: Exception) -> bool:

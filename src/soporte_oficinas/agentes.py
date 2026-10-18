@@ -20,6 +20,15 @@ TIPOS = frozenset({"red", "impresora", "acceso_aplicacion", "correo", "hardware"
                    "fuera_de_ambito"})
 SERVICIOS = frozenset({"vpn", "correo", "erp", "ficheros", "intranet",
                        "impresion", "wifi_invitados"})
+DESCRIPCION_SERVICIOS = {  # igual que docs/catalogo-servicios.md (lo comprueba una prueba)
+    "vpn": "Túnel de la oficina con el centro de datos y salida a internet",
+    "correo": "Correo corporativo (Outlook y webmail)",
+    "erp": "Aplicación de gestión (pedidos, facturación, almacén)",
+    "ficheros": "Carpetas compartidas de la oficina",
+    "impresion": "Servidor de colas de impresión",
+    "wifi_invitados": "Red inalámbrica para visitas",
+    "intranet": "Portal interno y autoservicio de contraseñas",
+}
 ACCIONES_PROPONIBLES = frozenset({"reiniciar_servicio", "cerrar_ticket"})
 MAX_ILEGIBLES = 2
 
@@ -33,6 +42,7 @@ class Agente:
     herramientas: tuple[str, ...]
     claves: tuple[str, ...]
     validar: Callable[[dict], None]
+    formato: str = ""  # ejemplo exacto de la salida final, con tipos y valores permitidos
 
 
 @dataclass
@@ -141,6 +151,12 @@ def validar_contrato(agente: Agente, datos: dict) -> dict:
 
 # --- Definición de los agentes ---------------------------------------------
 
+def _opciones(valores: frozenset[str]) -> str:
+    return "|".join(sorted(valores))
+
+
+_P = _opciones(PRIORIDADES)
+
 AGENTES: dict[str, Agente] = {
     "clasificador": Agente(
         "clasificador",
@@ -155,21 +171,30 @@ AGENTES: dict[str, Agente] = {
         ("buscar_tickets",),
         ("tipo", "prioridad", "motivo"),
         _validar_clasificador,
+        f'{{"tipo": "{_opciones(TIPOS)}", "prioridad": "{_P}", "motivo": "<texto>"}}',
     ),
     "diagnostico": Agente(
         "diagnostico",
         "Averiguas la causa probable consultando el estado real de los servicios, "
         "los equipos y los tickets. Indica el servicio afectado (o null si es un "
         "equipo) y, en evidencias, lo que has observado. Si la avería afecta a "
-        "más de una oficina, dilo en las evidencias.",
+        "más de una oficina, dilo en las evidencias.\n"
+        "Antes de concluir, consulta al menos una herramienta (por ejemplo, "
+        "consultar_servicio del servicio relacionado en la oficina de la incidencia) "
+        "y no inventes causas que no hayas observado.\n"
+        "Servicios de cada oficina:\n"
+        + "\n".join(f"- {s}: {d}" for s, d in DESCRIPCION_SERVICIOS.items()),
         ("consultar_servicio", "consultar_equipo", "buscar_tickets"),
         ("causa", "servicio", "evidencias"),
         _validar_diagnostico,
+        f'{{"causa": "<texto>", "servicio": "{_opciones(SERVICIOS)}" o null, '
+        '"evidencias": ["<texto>", "<texto>"]}',
     ),
     "conocimiento": Agente(
         "conocimiento",
         "Buscas en la base de conocimiento el procedimiento que resuelve la causa "
-        "diagnosticada y lo redactas para el empleado. Cita solo fragmentos que "
+        "diagnosticada y lo redactas para el empleado. Tu primer turno es SIEMPRE "
+        "una llamada a buscar_docs con la causa diagnosticada. Cita solo fragmentos que "
         "hayas recuperado con buscar_docs, con el formato docs/<fichero>.md#<seccion>. "
         "Si no encuentras procedimiento, devuelve procedimiento null y citas []. "
         "Las acciones irreversibles NO se llaman: se proponen en 'accion' como "
@@ -177,6 +202,9 @@ AGENTES: dict[str, Agente] = {
         ("buscar_docs", "reiniciar_servicio", "cerrar_ticket"),
         ("procedimiento", "citas", "accion"),
         _validar_conocimiento,
+        '{"procedimiento": "<texto>" o null, "citas": ["docs/<fichero>.md#<seccion>"], '
+        f'"accion": null o {{"herramienta": "{_opciones(ACCIONES_PROPONIBLES)}", '
+        '"argumentos": {...}}}',
     ),
     "escalado": Agente(
         "escalado",
@@ -186,6 +214,7 @@ AGENTES: dict[str, Agente] = {
         ("crear_escalado",),
         ("resumen", "probado", "prioridad"),
         _validar_escalado,
+        f'{{"resumen": "<texto>", "probado": ["<texto>", "<texto>"], "prioridad": "{_P}"}}',
     ),
 }
 
@@ -208,7 +237,9 @@ def prompt_sistema(agente: Agente, herramientas: dict[str, Herramienta]) -> str:
         agente.instrucciones,
         "Responde SIEMPRE con un único objeto JSON, sin texto adicional.",
         'Para usar una herramienta: {"herramienta": "<nombre>", "argumentos": {...}}',
-        f"Para terminar: un objeto con las claves {', '.join(agente.claves)}.",
+        f"Para terminar: un objeto con las claves {', '.join(agente.claves)}, "
+        "exactamente con este formato (las listas son listas JSON; | separa los "
+        f"valores permitidos):\n{agente.formato}",
         "Herramientas que puedes llamar:\n" + ("\n".join(llamables) or "- ninguna"),
     ]
     if proponibles:
