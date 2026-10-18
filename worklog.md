@@ -235,3 +235,51 @@ defecto en CLAUDE.md (ahora marcado "pendiente de verificar"). Alternativas
 vistas: esperar la renovación mensual, clave propia de un proveedor (p. ej.
 Groq) en los ajustes de Inference Providers, o Ollama local vía `base_url`.
 **Resultado:** `uv run pytest` en verde (239 pruebas).
+
+## Revisión 1 — CLAUDE.md y permisos (2026-10-18)
+**Contexto:** el enunciado dice que CLAUDE.md, los permisos, las órdenes y las
+pruebas los escribe el estudiante. Desde el hito 2 había delegado mucha
+redacción en Claude Code, así que reviso todo desde el principio. Método:
+Claude me pregunta sección a sección, yo decido, Claude redacta mis decisiones
+y yo reviso el resultado.
+**Revisado y validado** (redacción original de Claude, de acuerdo con mi
+criterio): objetivo de primer nivel con escalado a segundo; entrada y salida;
+dependencias; pruebas sin red ni token; token solo en `.env`; 4 agentes con
+mínimo privilegio; traspaso; ticket reabierto → escalado; avería en varias
+oficinas → escalado P1; sin citas no hay "resuelto"; conocimiento solo propone
+las acciones irreversibles; guardarraíl ampliado (nunca otra oficina, solo el
+ticket de la incidencia, máx. 1 reinicio por servicio); la prioridad solo se
+sube; tope de 12 pasos y 2 respuestas ilegibles → escalado.
+**Mis motivos:**
+- Sin framework de agentes: controlo y entiendo todo el código; el bucle y las
+  reglas de seguridad son míos y puedo explicarlos.
+- Traspaso: el soporte es un flujo secuencial; no se puede dar una solución
+  sin conocer antes la incidencia y su causa.
+- Ticket reabierto: si ya se intentó y no se pudo, debe evaluarlo segundo nivel.
+- Confirmación humana: la máquina puede no saberlo todo o equivocarse.
+- Tope 12 / 2 ilegibles: evita bucles y limita el gasto de créditos; se
+  revisará tras la prueba con el modelo real.
+**Cambios que decidí:**
+1. Web Streamlit **publicada con enlace** para que el profesor la pruebe sin
+   descargar nada. `streamlit` pasa a dependencia permitida solo para `app.py`
+   (resuelve la contradicción de CLAUDE.md).
+2. La web pública usa solo el modelo simulado: con el real, cualquiera con el
+   enlace gastaría mis créditos. El real solo se enseña en local.
+3. "Fuera de alcance" explícito y qué se dice al empleado si no se resuelve.
+4. El modelo real solo se usa cuando yo lo pido.
+5. "Forma de trabajar": autoría (decido yo, Claude redacta y yo reviso) y git
+   (un commit por hito o bloque; el push lo hago yo).
+6. Los casos de evaluación y su resultado esperado los defino yo sin mirar el
+   código (oráculo independiente).
+7. `settings.json`: `Read(./.env)` no impedía `cat .env` por terminal ni
+   borrar con `del`/`Remove-Item`. Añadidos al deny `cat|type|more|head|tail|
+   less|Get-Content .env*` y `del`, `rmdir`, `Remove-Item`.
+**Comprobación:** `cat .env.noexiste` y `del archivo_que_no_existe.txt`
+denegados por settings (ficheros inexistentes, sin riesgo de leer el token);
+`uv run pytest` en verde (239); CLAUDE.md 173 líneas.
+**Aprendido:** crear otro token no da más créditos (son de la cuenta, no del
+token); el 402 no se reintenta porque es un error permanente.
+**Limitación conocida:** los permisos son una barrera, no una garantía: un
+`uv run python` podría leer `.env`, pero está en "ask" y lo vería yo.
+**Dudas abiertas:** plataforma de la web (hito 8); créditos de HF para la
+prueba real.

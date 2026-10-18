@@ -6,10 +6,14 @@ acceso a una aplicación…) con varios pasos de diagnóstico sobre un estado
 simulado de servicios, y escalar a segundo nivel las que no se resuelven.
 Entrada: texto de la incidencia + oficina + id de ticket opcional.
 Salida: `Resultado` con estado final, respuesta al empleado con citas y traza.
+Fuera de alcance: peticiones que no son de soporte de oficinas (se rechazan) y
+reparaciones físicas. Si no se resuelve, la respuesta dice al empleado qué
+pasa ahora (escalado, su id y el tiempo de respuesta).
 
 ## Entorno y órdenes
 - Python 3.12, uv. Sin frameworks de agentes (ni LangGraph ni LangChain).
-- Dependencias permitidas: `huggingface-hub`, `python-dotenv`; dev: `pytest`.
+- Dependencias permitidas: `huggingface-hub`, `python-dotenv`; dev: `pytest`;
+  `streamlit` solo para `app.py` (hito 8).
   Cualquier otra se pide antes (`uv add` está en ask).
 - Ejecutar: `uv run soporte-oficinas "<incidencia>" --oficina MAD-01 [--ticket T-0007] [--modelo simulado|hf]`
 - Pruebas: `uv run pytest` — sin red y sin `HF_TOKEN`.
@@ -143,13 +147,26 @@ Cada herramienta tiene `descripcion` en el registro; devuelve dict o lanza
 - Cada requisito R1–R5 tiene al menos una prueba que fallaría si el código fallara.
 - Evaluación (4+ casos) en `tests/test_evaluacion.py`: resultado esperado
   (`final`, tipo, prioridad) y trayectoria esperada (secuencia de agentes).
+  Los casos y su resultado esperado los defino yo sin mirar el código
+  (oráculo independiente).
 
 ## Interfaz web (último hito)
 Streamlit en `app.py`, arranque `uv run streamlit run app.py`. Solo llama a
 `orquestar()`; `confirmar` es un botón. Sin lógica de agentes en la web.
+Se publica con un enlace para que el profesor la pruebe sin descargar nada;
+el token, si se usa, va en los secretos del servidor, nunca en el código.
+La web pública usa solo el modelo simulado: cualquiera con el enlace gastaría
+mis créditos de HF. El modelo real solo se enseña en local.
+Plataforma (Streamlit Cloud o HF Spaces): se decide en el hito 8.
 
 ## Forma de trabajar
 - Un hito por orden en `.claude/commands/`; no se adelanta trabajo de otro hito.
+- Autoría: las decisiones de CLAUDE.md, permisos, órdenes y casos de
+  evaluación son mías. Claude Code las redacta a partir de lo que hablamos
+  (para ahorrar tiempo de escritura), implementa el código y señala riesgos;
+  yo reviso cada cambio. El worklog dice quién redactó cada cosa.
+- Git: un commit por hito o por bloque de revisión; el push lo hago yo.
+- El modelo real (`--modelo hf`) solo se usa cuando yo lo pido: gasta créditos.
 - Cada cambio de código va con su prueba; `uv run pytest` en verde al cerrar.
 - Código en español (nombres y docstrings), tipado, funciones cortas.
 - No hacer: leer `.env`, añadir dependencias sin pedirlo, confiar una regla

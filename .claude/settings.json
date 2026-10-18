@@ -16,8 +16,19 @@
     "deny": [
       "Read(./.env)",
       "Edit(./.env)",
+      "Bash(cat .env*)",
+      "Bash(cat ./.env*)",
+      "Bash(type .env*)",
+      "Bash(more .env*)",
+      "Bash(head .env*)",
+      "Bash(tail .env*)",
+      "Bash(less .env*)",
+      "Bash(Get-Content .env*)",
       "Bash(git push:*)",
       "Bash(rm:*)",
+      "Bash(del:*)",
+      "Bash(rmdir:*)",
+      "Bash(Remove-Item:*)",
       "Bash(curl:*)",
       "WebFetch"
     ]
