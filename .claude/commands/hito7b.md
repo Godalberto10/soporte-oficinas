@@ -1,5 +1,7 @@
 ---
 description: Hito 7b — arreglar lo que encontró mi evaluación (rechazo, equipo lento, simulado)
+disable-model-invocation: true
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv run pytest:*), Bash(uv run python -m soporte_oficinas.evaluacion:*)
 ---
 # Hito 7b — Arreglos tras la evaluación
 
@@ -51,3 +53,8 @@ causa, no por haber cambiado la prueba.
 
 ## Al terminar
 Pega las dos tablas de evaluación y una tabla criterio → prueba. No hagas commit.
+
+## Qué reviso yo
+1. Que los `xfail` desaparecen porque se arregla la causa, no la prueba.
+2. Que ningún valor esperado de la evaluación ha cambiado.
+3. Que "me va lento el ordenador" da el procedimiento de `kb-hardware-03`.

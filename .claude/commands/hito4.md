@@ -1,5 +1,7 @@
 ---
 description: Hito 4 — bucle común de agente y los 4 agentes (clasificador, diagnostico, conocimiento, escalado)
+disable-model-invocation: true
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv run pytest:*)
 ---
 # Hito 4 — Agentes
 
@@ -104,3 +106,8 @@ devuelva su objeto JSON validado, dejándolo todo en la traza.
 
 ## Al terminar
 Resume en una tabla qué prueba cubre cada criterio. No hagas commit.
+
+## Qué reviso yo
+1. Que una herramienta irreversible nunca se ejecuta dentro del bucle del agente.
+2. Que el prompt de cada agente solo muestra sus herramientas permitidas.
+3. Que 2 respuestas ilegibles seguidas paran el agente.

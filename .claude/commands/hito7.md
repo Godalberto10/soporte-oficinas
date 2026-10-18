@@ -1,5 +1,7 @@
 ---
 description: Hito 7 — evaluación con mis casos de resultado y trayectoria esperados
+disable-model-invocation: true
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv run pytest:*), Bash(uv run python -m soporte_oficinas.evaluacion:*)
 ---
 # Hito 7 — Evaluación
 
@@ -71,3 +73,8 @@ C = clasificador, D = diagnostico, K = conocimiento, E = escalado.
 ## Al terminar
 Pega la tabla de resultados de las dos pasadas y explícame cada fallo:
 ¿es del código o de mi expectativa? No hagas commit.
+
+## Qué reviso yo
+1. Que lo esperado de cada caso es lo de mi tabla y no se cambia para que pase.
+2. Cada fallo: si es del código o de mi expectativa.
+3. La tabla de resultados para el informe.

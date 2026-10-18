@@ -1,5 +1,7 @@
 ---
 description: Hito 3 — índice BM25 propio sobre docs/ y herramienta buscar_docs
+disable-model-invocation: true
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv run pytest:*)
 ---
 # Hito 3 — Recuperación BM25 y `buscar_docs`
 
@@ -73,3 +75,8 @@ citarlos con un formato que el orquestador pueda comprobar en el hito 5.
 
 ## Al terminar
 Resume en una tabla qué prueba cubre cada criterio. No hagas commit.
+
+## Qué reviso yo
+1. La tabla de consultas: cada una devuelve primero el documento que yo espero.
+2. El margen de `politica-reinicios.md` frente al segundo resultado (≥ 1,2).
+3. Que cada cita tiene la forma `docs/<fichero>.md#<seccion>` y el fichero existe.

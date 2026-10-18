@@ -1,5 +1,7 @@
 ---
 description: Hito 6b — modelo local con Ollama para las trazas reales
+disable-model-invocation: true
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv run pytest:*)
 ---
 # Hito 6b — Modelo local (Ollama)
 
@@ -37,3 +39,8 @@ créditos, se usaran más cuentas u Ollama. Las cuentas no sirven; uso Ollama.
 
 ## Al terminar
 Tabla criterio → prueba. No hagas commit.
+
+## Qué reviso yo
+1. Que `--modelo hf` sigue igual y las pruebas no necesitan Ollama.
+2. Las trazas reales: formato de las respuestas, uso de herramientas y final.
+3. Que el prompt mejorado sale de las mismas listas que valida el código.

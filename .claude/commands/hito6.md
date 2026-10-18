@@ -1,5 +1,7 @@
 ---
 description: Hito 6 — ModeloHF (Hugging Face), ModeloSimulado y la orden soporte-oficinas
+disable-model-invocation: true
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv run pytest:*)
 ---
 # Hito 6 — Modelo real y línea de órdenes
 
@@ -86,3 +88,8 @@ y anoto en worklog.md el modelo elegido, el resultado y la trayectoria.
 
 ## Al terminar
 Resume en una tabla qué prueba cubre cada criterio. No hagas commit.
+
+## Qué reviso yo
+1. Que ninguna prueba usa red ni lee `.env`.
+2. Que un error del modelo sale sin el token y con código 2.
+3. La ejecución real con `--modelo hf --traza` (la lanzo yo: gasta créditos).

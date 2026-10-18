@@ -481,3 +481,8 @@ páginas, zip sin `.env` que arranca en limpio) y los mínimos del tema 2.
 - La acción irreversible es simulada en memoria (no toca ningún sistema real)
   en vez de escribir en un fichero: así cada ejecución y cada prueba parte del
   mismo estado.
+**Órdenes:** añadidas a las 9 la cabecera `disable-model-invocation: true`
+(solo se lanzan cuando yo las pido) y `allowed-tools` (solo lo que necesita
+cada hito: leer y editar código y `uv run pytest`; en los hitos 7 y 7b,
+además, la tabla de evaluación), y una sección "Qué reviso yo" con lo que
+compruebo en cada hito. Redactado por Claude a partir de esta revisión.

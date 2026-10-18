@@ -1,5 +1,7 @@
 ---
 description: Hito 2 — estado compartido, ScriptedModel y herramientas con su registro
+disable-model-invocation: true
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv run pytest:*)
 ---
 # Hito 2 — Estado, modelo simulado y herramientas
 
@@ -76,3 +78,8 @@ que consultan y modifican el estado simulado de la red.
 
 ## Al terminar
 Resume en una tabla qué prueba cubre cada criterio. No hagas commit.
+
+## Qué reviso yo
+1. Que `data/*.json` no cambia al reiniciar, cerrar o escalar (huella SHA-256 en las pruebas).
+2. Que una herramienta inexistente o con argumentos mal formados da `ErrorHerramienta` y no otro error.
+3. Que dos `Red` no comparten datos.

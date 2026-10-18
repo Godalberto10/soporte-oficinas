@@ -1,5 +1,7 @@
 ---
 description: Hito 1 — datos simulados (data/) y base de conocimiento (docs/)
+disable-model-invocation: true
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv run pytest:*)
 ---
 
 # Hito 1 — Datos y documentos
@@ -39,3 +41,8 @@ trabajarán los agentes, con los tres casos difíciles del enunciado presentes.
 
 ## Al terminar
 Resume en una tabla qué fichero cubre cada criterio. No hagas commit.
+
+## Qué reviso yo
+1. Que los tres casos difíciles están en los datos: mismo síntoma con causa distinta (T-0001/T-0002), ticket reabierto (T-0007) y ERP caído en MAD-02 y BCN-01.
+2. Que las políticas de `docs/` dicen lo mismo que CLAUDE.md (críticos, horario, P1–P4); lo comprueba `test_datos.py`.
+3. Que los datos son simulados y no hay datos personales reales.

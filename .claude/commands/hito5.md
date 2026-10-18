@@ -1,5 +1,7 @@
 ---
 description: Hito 5 — orquestador con traspaso y reglas R1–R5 garantizadas en código
+disable-model-invocation: true
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv run pytest:*)
 ---
 # Hito 5 — Orquestador y reglas de seguridad
 
@@ -123,3 +125,8 @@ respuesta al empleado, las citas válidas y la traza completa.
 
 ## Al terminar
 Resume en una tabla qué prueba cubre cada criterio y cada regla R1–R5. No hagas commit.
+
+## Qué reviso yo
+1. Que cada regla R1–R5 tiene una prueba que falla si se rompe la regla (mutaciones).
+2. Que las trayectorias de los tres casos difíciles son las de CLAUDE.md.
+3. Que con `confirmar` falso la red no cambia y la acción no aparece en la traza.
