@@ -441,3 +441,9 @@ probó ("reiniciar navegador"). No es peligroso, pero es inexacto.
 **Comprobación:** `uv run pytest` → 289 en verde (sin Ollama ni red). Informe
 regenerado con las dos trazas (4 páginas). Al regenerarlo, `settings.json`
 bloqueó un `rm` de imágenes temporales: el permiso funciona.
+
+## Informe — revisión mía
+Al leerlo pedí dos cambios: una tabla con las prioridades P1–P4 (criterio,
+ejemplo de los datos y tiempo de primera respuesta) y una sección "Modelos de
+lenguaje" que aclare qué modelo se usa para qué (pruebas, simulado, Ollama
+para las trazas y HF opcional) y por qué no HF. Quedan 4 páginas.

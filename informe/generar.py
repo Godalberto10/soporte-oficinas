@@ -51,7 +51,8 @@ E = {
     "celda-b": ParagraphStyle("celda-b", fontName="Texto-B", fontSize=8.8, leading=11,
                               textColor=colors.white),
     "mono": ParagraphStyle("mono", fontName="Mono", fontSize=7.4, leading=9,
-                           textColor=TINTA),
+                           textColor=TINTA, backColor=SUAVE, borderPadding=5,
+                           leftIndent=5, rightIndent=5, spaceBefore=6, spaceAfter=6),
     "nota": ParagraphStyle("nota", fontName="Texto-I", fontSize=8.5, leading=11,
                            textColor=GRIS),
 }
@@ -101,8 +102,9 @@ def traza(n: int, titulo: str) -> list:
         crudo = fichero.read_bytes()  # PowerShell puede guardar en UTF-16
         texto = crudo.decode("utf-16" if crudo[:2] in (b"\xff\xfe", b"\xfe\xff")
                              else "utf-8-sig").strip()
-        return [KeepTogether([cabecera, recuadro(Preformatted(texto, E["mono"],
-                                                              maxLineLength=108, newLineChars="      "))])]
+        # Preformatted fuera de una tabla: puede partirse entre páginas
+        return [cabecera, Preformatted(texto, E["mono"], maxLineLength=106,
+                                       newLineChars="      ")]
     aviso = ("Pendiente: se ejecutará con <font name='Mono'>--modelo ollama --traza</font>.")
     return [cabecera, recuadro(Paragraph(aviso, E["nota"]))]
 
@@ -160,8 +162,46 @@ def contenido() -> list:
           "JSON (llamada a herramienta o salida final); el código valida el contrato y su "
           "prompt se genera desde el registro, con <b>solo</b> las herramientas permitidas a "
           "ese agente (mínimo privilegio)."),
+        p("<b>Prioridades.</b> Las propone el clasificador; el código la <b>sube</b> si los "
+          "datos exigen más (nunca la baja) y un rechazo no tiene prioridad. Servicios "
+          "críticos: vpn, correo, erp, ficheros e intranet (la intranet aloja el autoservicio "
+          "de contraseñas: si falla es un problema de seguridad). No críticos: impresión y "
+          "wifi de invitados."),
+        tabla([
+            ["", "Criterio", "Ejemplo en los datos", "1.ª respuesta"],
+            ["P1", "Afecta a más de una oficina, o un servicio crítico está caído",
+             "vpn caída en MAD-01; erp caído en MAD-02 y BCN-01", "15 min"],
+            ["P2", "Afecta a una oficina entera, o un crítico está degradado",
+             "correo degradado en BCN-01", "30 min"],
+            ["P3", "Un empleado no puede trabajar y no tiene alternativa",
+             "PC sin red en VAL-01 (tarjeta averiada)", "2 h"],
+            ["P4", "Molestia con alternativa",
+             "una impresora (hay otras), el equipo va lento", "1 día laborable"],
+        ], [1, 6.5, 6.8, 2.7]),
 
-        h("3. Herramientas y conocimiento"),
+        h("3. Modelos de lenguaje"),
+        p("Los cuatro modelos cumplen el mismo contrato, <font name='Mono'>generar(sistema, "
+          "mensajes) → texto</font>, así que el resto del sistema no sabe cuál usa y las "
+          "reglas se aplican igual con todos."),
+        tabla([
+            ["Modelo", "Qué es", "Para qué se usa", "Qué necesita"],
+            ["ScriptedModel", "Respuestas fijadas de antemano",
+             "Las 289 pruebas y la evaluación", "Nada"],
+            ["ModeloSimulado", "Reglas por palabras clave, determinista",
+             "Demo sin token y web (por defecto)", "Nada"],
+            ["ModeloOllama (qwen2.5:14b)", "Modelo real ejecutado en mi ordenador con Ollama",
+             "Las dos trazas reales del informe", "Gratis: instalar Ollama y el modelo (9 GB)"],
+            ["ModeloHF (Qwen2.5-72B)", "Modelo real en los servidores de Hugging Face",
+             "Opcional", "Token y créditos de pago"],
+        ], [3.6, 4.6, 4.4, 4.4]),
+        Spacer(1, 4),
+        p("El plan inicial era Hugging Face, pero ya no da créditos gratuitos: dos cuentas "
+          "devolvieron <i>402 Payment Required</i>. Como indicó el profesor en clase, usé "
+          "Ollama, que ejecuta el modelo en local sin token ni coste. El código de Hugging "
+          "Face sigue disponible con <font name='Mono'>--modelo hf</font>. Para corregir no "
+          "hace falta ninguno de los dos: las pruebas y el README usan el simulado."),
+
+        h("4. Herramientas y conocimiento"),
         p("Siete herramientas en un registro con <b>descripción</b> y marca de "
           "<b>reversible</b>; todas pasan por un único punto (<font name='Mono'>ejecutar</font>) "
           "que convierte cualquier fallo en <font name='Mono'>ErrorHerramienta</font>. Las dos "
@@ -176,7 +216,7 @@ def contenido() -> list:
           "explicable. Limitación: no entiende sinónimos; se mitiga con frases de empleados en "
           "cada sección de síntomas."),
 
-        h("4. Robustez y seguridad"),
+        h("5. Robustez y seguridad"),
         tabla([
             ["Regla (en código)", "Qué garantiza"],
             ["R1 Confirmación", "Una acción irreversible solo se ejecuta si confirmar() devuelve "
@@ -201,8 +241,8 @@ def contenido() -> list:
           "datos. El token vive solo en mi <font name='Mono'>.env</font>: no está en el código "
           "ni en la entrega."),
 
-        h("5. Pruebas y evaluación"),
-        p("276 pruebas con <b>dobles del modelo</b> (ScriptedModel con respuestas fijadas y un "
+        h("6. Pruebas y evaluación"),
+        p("289 pruebas con <b>dobles del modelo</b> (ScriptedModel con respuestas fijadas y un "
           "cliente falso para Hugging Face): deterministas, sin red y sin token. Cada regla "
           "R1–R5 tiene pruebas que fallan si se rompe; se comprobó rompiendo cada regla a "
           "propósito (mutaciones)."),
@@ -238,11 +278,9 @@ def contenido() -> list:
           "la tarjeta de red. Por eso se evalúa también la trayectoria y los datos. Tras los "
           "arreglos: <b>11/11 y 9/9</b>."),
 
-        h("6. Dos trazas reales"),
-        p("Hugging Face ya no da créditos gratuitos (dos cuentas devolvieron <i>402 Payment "
-          "Required</i>), así que, como indicó el profesor, usé un modelo real en local con "
-          "<b>Ollama</b> (<font name='Mono'>--modelo ollama</font>), con el mismo código y "
-          "las mismas reglas. Con <b>qwen2.5:7b</b> las primeras trazas acabaron escaladas: el "
+        h("7. Dos trazas reales"),
+        p("Con Ollama (sección 3, <font name='Mono'>--modelo ollama</font>). Con "
+          "<b>qwen2.5:7b</b> las primeras trazas acabaron escaladas: el "
           "modelo devolvía JSON fuera de contrato (R4), no consultaba herramientas y se "
           "inventaba citas (R5 las eliminó). Las reglas evitaron cualquier daño, pero el "
           "prompt no decía el formato exacto, los valores permitidos ni qué es cada servicio. "
@@ -255,8 +293,7 @@ def contenido() -> list:
         *traza(2, "«no puedo entrar en el ERP» en MAD-02: avería en varias oficinas, "
                   "escalado P1."),
 
-        PageBreak(),
-        h("7. Forma de trabajo y limitaciones"),
+        h("8. Forma de trabajo y limitaciones"),
         p("Dirigí a Claude Code con un <b>CLAUDE.md</b> de menos de 200 líneas (contratos, "
           "reglas y valores cerrados), permisos de mínimo privilegio y <b>una orden por "
           "hito</b> con criterios comprobables (hitos 0 a 7b). Las decisiones son mías; Claude "
