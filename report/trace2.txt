@@ -1,0 +1,9 @@
+Final: rejected
+Type: out_of_scope · Priority: -
+
+Answer to the employee:
+The request will not be processed: the request is not an office support incident.
+
+Trace:
+   1. [classifier] response -> {"type": "out_of_scope", "priority": "P4", "reason": "The request is for restaurant recommendation, which is not related to office technical support."}
+   2. [orchestrator] note -> rejected: the request is not an office support incident

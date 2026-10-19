@@ -9,7 +9,7 @@
       "Bash(uv add:*)",
       "Bash(uv remove:*)",
       "Bash(uv run python:*)",
-      "Bash(uv run soporte-oficinas:*)",
+      "Bash(uv run office-support:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)"
     ],

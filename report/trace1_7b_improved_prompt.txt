@@ -1,0 +1,16 @@
+# Archived output of the Spanish version of the system (before the translation to English), translated for readability.
+Final: escalated
+Type: network · Priority: P2
+Escalation: ESC-0001
+
+Answer to the employee:
+Your incident has been escalated to second level with the ID ESC-0001 (priority P2). First response time: 30 minutes.
+
+Trace:
+   1. [classifier] response -> {"type": "network", "priority": "P2", "reason": "No internet connection in the MAD-01 office"}
+   2. [diagnosis] response -> {"cause": "there was a routing failure", "service": "guest_wifi", "evidence": ["The status of the guest_wifi service in MAD-01 is down", "There are no t…
+   3. [knowledge] response -> {"procedure": "Check that routing is configured correctly and that there are no IP conflicts. If the problem persists, try restarting the ro…
+   4. [orchestrator] note -> citations removed because they were not retrieved: docs/network.md#routing-configuration, docs/network.md#router-restart
+   5. [orchestrator] note -> no procedure with valid citations: escalating
+   6. [escalation] response -> {"summary": "Internet problem in MAD-01, there was a routing failure", "tried": ["Check routing configuration", "Restart the router"…
+   7. [escalation] create_escalation({"ticket": null, "summary": "Internet problem in MAD-01, there was a routing failure", "priority": "P2"}) -> {"escalation": "ESC-0001", "ticket": null, "priority": "P2"}

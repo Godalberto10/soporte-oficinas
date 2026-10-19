@@ -1,7 +1,7 @@
-"""La página web de verdad, con streamlit.testing (hito 8).
+"""The real web page, with streamlit.testing (milestone 8).
 
-Se omite si Streamlit no está instalado: `uv run pytest` no lo necesita.
-Para lanzarlas: uv run --group web pytest tests/test_app.py
+Skipped if Streamlit is not installed: `uv run pytest` does not need it.
+To run them: uv run --group web pytest tests/test_app.py
 """
 
 from pathlib import Path
@@ -15,61 +15,61 @@ APP = str(Path(__file__).resolve().parents[1] / "app.py")
 
 
 @pytest.fixture(autouse=True)
-def sin_ollama(monkeypatch):
-    """Las pruebas no dependen de que Ollama esté funcionando en el equipo."""
-    from soporte_oficinas import web
-    monkeypatch.setattr(web, "modelos_ollama", lambda *a, **k: [])
+def without_ollama(monkeypatch):
+    """The tests do not depend on Ollama running on the computer."""
+    from office_support import web
+    monkeypatch.setattr(web, "ollama_models", lambda *a, **k: [])
 
 
 def _app() -> AppTest:
     return AppTest.from_file(APP, default_timeout=30).run()
 
 
-def _textos(app: AppTest) -> str:
-    bloques = [*app.markdown, *app.success, *app.warning, *app.error, *app.info]
-    return " ".join(str(b.value) for b in bloques)
+def _texts(app: AppTest) -> str:
+    blocks = [*app.markdown, *app.success, *app.warning, *app.error, *app.info]
+    return " ".join(str(b.value) for b in blocks)
 
 
-def test_la_pagina_carga_sin_errores():
+def test_the_page_loads_without_errors():
     app = _app()
     assert not app.exception
-    assert "Soporte técnico" in app.title[0].value
+    assert "Technical support" in app.title[0].value
 
 
-def test_ejemplo_varias_oficinas_muestra_escalado_p1():
+def test_several_offices_example_shows_p1_escalation():
     app = _app()
-    app.button(key="ej_2").click().run()
-    assert "Escalado a segundo nivel" in _textos(app)
+    app.button(key="ex_2").click().run()
+    assert "Escalated to second level" in _texts(app)
     assert any(m.value == "P1" for m in app.metric)
 
 
-def test_confirmar_con_boton_resuelve():
+def test_confirming_with_button_resolves():
     app = _app()
-    app.button(key="ej_0").click().run()
-    assert "irreversible" in _textos(app)
-    app.button(key="confirmar").click().run()
-    assert "Resuelto en primer nivel" in _textos(app)
+    app.button(key="ex_0").click().run()
+    assert "irreversible" in _texts(app)
+    app.button(key="confirm").click().run()
+    assert "Resolved at first level" in _texts(app)
 
 
-def test_rechazar_con_boton_escala():
+def test_rejecting_with_button_escalates():
     app = _app()
-    app.button(key="ej_0").click().run()
-    app.button(key="rechazar").click().run()
-    assert "Escalado a segundo nivel" in _textos(app)
+    app.button(key="ex_0").click().run()
+    app.button(key="reject").click().run()
+    assert "Escalated to second level" in _texts(app)
 
 
-def test_formulario_escrito_a_mano():
-    """Fallo encontrado por Alberto al probar la web: el botón del formulario rompía la página."""
+def test_form_typed_by_hand():
+    """Bug found by Alberto when trying the web: the form button broke the page."""
     app = _app()
-    app.text_area(key="incidencia").input("No me enciende el ordenador")
+    app.text_area(key="incident").input("My computer won't turn on")
     app.text_input(key="ticket").input("T-0001")
-    next(b for b in app.button if b.label == "Atender incidencia").click().run()
+    next(b for b in app.button if b.label == "Handle incident").click().run()
     assert not app.exception
     assert any(m.value == "hardware" for m in app.metric)
 
 
-def test_selector_muestra_el_modelo_real_si_hay_ollama(monkeypatch):
-    from soporte_oficinas import web
-    monkeypatch.setattr(web, "modelos_ollama", lambda *a, **k: ["qwen2.5:14b"])
+def test_selector_shows_the_real_model_if_ollama_is_running(monkeypatch):
+    from office_support import web
+    monkeypatch.setattr(web, "ollama_models", lambda *a, **k: ["qwen2.5:14b"])
     app = _app()
-    assert app.radio(key="modelo").options == ["Simulado", "Real · qwen2.5:14b"]
+    assert app.radio(key="model").options == ["Simulated", "Real · qwen2.5:14b"]

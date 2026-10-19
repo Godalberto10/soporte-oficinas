@@ -1,0 +1,22 @@
+Final: escalated
+Type: network · Priority: P1
+Escalation: ESC-0001
+
+Answer to the employee:
+Your incident has been escalated to second level with the ID ESC-0001 (priority P1). First response time: 15 minutes.
+
+Trace:
+   1. [classifier] response -> {"type": "network", "priority": "P2", "reason": "Cannot log in to ERP, which is a critical service."}
+   2. [diagnosis] response -> {"tool": "check_service", "arguments": {"service": "erp", "office": "MAD-02"}}
+   3. [diagnosis] check_service({"service": "erp", "office": "MAD-02"}) -> {"service": "erp", "office": "MAD-02", "status": "down"}
+   4. [diagnosis] response -> {"tool": "check_service", "arguments": {"service": "vpn", "office": "MAD-02"}}
+   5. [diagnosis] check_service({"service": "vpn", "office": "MAD-02"}) -> {"service": "vpn", "office": "MAD-02", "status": "ok"}
+   6. [diagnosis] response -> {"tool": "check_service", "arguments": {"service": "email", "office": "MAD-02"}}
+   7. [diagnosis] check_service({"service": "email", "office": "MAD-02"}) -> {"service": "email", "office": "MAD-02", "status": "ok"}
+   8. [diagnosis] response -> {"tool": "search_tickets", "arguments": {"office": "MAD-02", "symptom": "ERP"}}
+   9. [diagnosis] search_tickets({"office": "MAD-02", "symptom": "ERP"}) -> {"tickets": [{"id": "T-0004", "office": "MAD-02", "symptom": "I can't log in to the ERP", "status": "open", "reopenings": 0}]}
+  10. [diagnosis] response -> {"cause": "The ERP service is down according to the service check.", "service": "erp", "evidence": ["The ERP service status is down in MAD-02.", "The VPN and em…
+  11. [orchestrator] note -> priority raised from P2 to P1: service erp affected in MAD-02, BCN-01
+  12. [orchestrator] note -> direct escalation: multi-office outage of erp: MAD-02, BCN-01
+  13. [escalation] response -> {"summary": "ERP service is down in MAD-02 and BCN-01, preventing users from logging in.", "tried": ["Checked service status which confirms ERP service is down.…
+  14. [escalation] create_escalation({"ticket": null, "summary": "ERP service is down in MAD-02 and BCN-01, preventing users from logging in.", "priority": "P1"}) -> {"escalation": "ESC-0001", "ticket": null, "priority": "P1"}

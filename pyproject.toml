@@ -1,7 +1,7 @@
 [project]
-name = "soporte-oficinas"
+name = "office-support"
 version = "0.1.0"
-description = "Add your description here"
+description = "Technical support for an office network: a multi-agent system"
 readme = "README.md"
 authors = [
     { name = "Godalberto10", email = "aolmosa17@gmail.com" }
@@ -13,7 +13,8 @@ dependencies = [
 ]
 
 [project.scripts]
-soporte-oficinas = "soporte_oficinas.cli:main"
+office-support = "office_support.cli:main"
+office-support-web = "office_support.server:main"
 
 [build-system]
 requires = ["uv_build>=0.12.9,<0.13.0"]

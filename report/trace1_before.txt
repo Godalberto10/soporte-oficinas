@@ -1,0 +1,16 @@
+# Archived output of the Spanish version of the system (before the translation to English), translated for readability.
+Final: escalated
+Type: network · Priority: P2
+Escalation: ESC-0001
+
+Answer to the employee:
+Your incident has been escalated to second level with the ID ESC-0001 (priority P2). First response time: 30 minutes.
+
+Trace:
+   1. [classifier] response -> {"type": "network", "priority": "P2", "reason": "There is no internet in the MAD-01 office, affecting the employees' work."}
+   2. [diagnosis] response -> invalid response ('service' must be one of ['email', 'erp', 'files', 'guest_wifi', 'intranet', 'printing', 'vpn']): {"cause": "incorrect config…
+   3. [diagnosis] response -> invalid response ('evidence' must be a list of strings): {"cause": "incorrect router configuration", "service": "intranet", "evidence": "Status …
+   4. [orchestrator] note -> 2 unreadable responses in a row from diagnosis: escalating
+   5. [escalation] response -> invalid response ('tried' must be a list of strings): {"summary": "No-internet incident in MAD-01. Diagnosis: network problem.", "tried":…
+   6. [escalation] response -> {"summary": "No-internet incident in MAD-01. Diagnosis: network problem.", "tried": ["The network connection has been checked."], "priority": "P2", …
+   7. [escalation] create_escalation({"ticket": null, "summary": "No-internet incident in MAD-01. Diagnosis: network problem.", "priority": "P2"}) -> {"escalation": "ESC-0001", "ticket": null, "priority": "P2"}

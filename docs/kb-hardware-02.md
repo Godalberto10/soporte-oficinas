@@ -1,17 +1,17 @@
-# El monitor no muestra imagen
+# The monitor shows no image
 
-## Síntomas
-- El equipo enciende pero la pantalla está en negro o muestra "sin señal".
-- El piloto del monitor parpadea en naranja.
+## Symptoms
+- The computer turns on but the screen is black or shows "no signal".
+- The monitor's power light blinks orange.
 
-## Causa
-Cable de vídeo suelto, entrada de vídeo mal seleccionada en el monitor o
-monitor averiado.
+## Cause
+Loose video cable, wrong video input selected on the monitor, or a
+faulty monitor.
 
-## Pasos
-1. Consultar la ficha del monitor con `consultar_equipo`.
-2. Pedir al empleado que compruebe que el cable de vídeo está bien
-   conectado en ambos extremos.
-3. Seleccionar la entrada correcta (HDMI o DisplayPort) con el botón del monitor.
-4. Probar con otro monitor si hay uno libre; si funciona, escalar la
-   sustitución del monitor a segundo nivel.
+## Steps
+1. Check the monitor record with `check_device`.
+2. Ask the employee to make sure the video cable is firmly
+   connected at both ends.
+3. Select the correct input (HDMI or DisplayPort) with the monitor's button.
+4. Try another monitor if one is free; if it works, escalate the
+   monitor replacement to second level.

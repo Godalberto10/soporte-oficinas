@@ -1,12 +1,12 @@
 [
-  {"id": "T-0001", "oficina": "MAD-01", "sintoma": "no tengo internet", "estado": "abierto", "reaperturas": 0},
-  {"id": "T-0002", "oficina": "VAL-01", "sintoma": "no tengo internet", "estado": "abierto", "reaperturas": 0},
-  {"id": "T-0003", "oficina": "BCN-01", "sintoma": "la impresora no imprime", "estado": "cerrado", "reaperturas": 0},
-  {"id": "T-0004", "oficina": "MAD-02", "sintoma": "no puedo entrar en el ERP", "estado": "abierto", "reaperturas": 0},
-  {"id": "T-0005", "oficina": "BCN-01", "sintoma": "no puedo entrar en el ERP", "estado": "abierto", "reaperturas": 0},
-  {"id": "T-0006", "oficina": "BCN-01", "sintoma": "el correo tarda mucho en llegar", "estado": "abierto", "reaperturas": 0},
-  {"id": "T-0007", "oficina": "MAD-02", "sintoma": "la impresora no imprime", "estado": "reabierto", "reaperturas": 2},
-  {"id": "T-0008", "oficina": "VAL-01", "sintoma": "el portátil no enciende", "estado": "abierto", "reaperturas": 0},
-  {"id": "T-0009", "oficina": "MAD-01", "sintoma": "la wifi de invitados no funciona", "estado": "abierto", "reaperturas": 0},
-  {"id": "T-0010", "oficina": "VAL-01", "sintoma": "la intranet va muy lenta", "estado": "cerrado", "reaperturas": 0}
+  {"id": "T-0001", "office": "MAD-01", "symptom": "I have no internet", "status": "open", "reopenings": 0},
+  {"id": "T-0002", "office": "VAL-01", "symptom": "I have no internet", "status": "open", "reopenings": 0},
+  {"id": "T-0003", "office": "BCN-01", "symptom": "the printer is not printing", "status": "closed", "reopenings": 0},
+  {"id": "T-0004", "office": "MAD-02", "symptom": "I can't log in to the ERP", "status": "open", "reopenings": 0},
+  {"id": "T-0005", "office": "BCN-01", "symptom": "I can't log in to the ERP", "status": "open", "reopenings": 0},
+  {"id": "T-0006", "office": "BCN-01", "symptom": "email takes a long time to arrive", "status": "open", "reopenings": 0},
+  {"id": "T-0007", "office": "MAD-02", "symptom": "the printer is not printing", "status": "reopened", "reopenings": 2},
+  {"id": "T-0008", "office": "VAL-01", "symptom": "my laptop won't turn on", "status": "open", "reopenings": 0},
+  {"id": "T-0009", "office": "MAD-01", "symptom": "the guest wifi is not working", "status": "open", "reopenings": 0},
+  {"id": "T-0010", "office": "VAL-01", "symptom": "the intranet is very slow", "status": "closed", "reopenings": 0}
 ]

@@ -1,107 +1,107 @@
-"""Pruebas de la orden soporte-oficinas (sin red, sin .env)."""
+"""Tests of the office-support command (no network, no .env)."""
 
 import tomllib
 from pathlib import Path
 
 import pytest
 
-from soporte_oficinas import cli
-from soporte_oficinas import modelo as modulo_modelo
-from soporte_oficinas.estado import Accion
+from office_support import cli
+from office_support import model as model_module
+from office_support.state import Action
 
-RAIZ = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent
 
 
 @pytest.fixture(autouse=True)
-def sin_env_real(monkeypatch):
-    monkeypatch.setattr(modulo_modelo, "load_dotenv", lambda *a, **k: False)
+def without_real_env(monkeypatch):
+    monkeypatch.setattr(model_module, "load_dotenv", lambda *a, **k: False)
     monkeypatch.delenv("HF_TOKEN", raising=False)
 
 
-def responde(texto: str):
-    preguntas: list[str] = []
+def answers(text: str):
+    questions: list[str] = []
 
-    def entrada(pregunta: str) -> str:
-        preguntas.append(pregunta)
-        return texto
-    entrada.preguntas = preguntas
-    return entrada
+    def read(question: str) -> str:
+        questions.append(question)
+        return text
+    read.questions = questions
+    return read
 
 
-def sin_terminal(pregunta: str) -> str:
+def no_terminal(question: str) -> str:
     raise EOFError
 
 
-# --- Criterio 6: salida y confirmación ----------------------------------------
+# --- Criterion 6: output and confirmation ----------------------------------------
 
-def test_cli_confirmar_si_resuelve(capsys):
-    entrada = responde("s")
-    codigo = cli.main(["no tengo internet", "--oficina", "MAD-01"], entrada)
-    salida = capsys.readouterr().out
-    assert codigo == 0
-    assert "Final: resuelto" in salida
-    assert "Tipo: red" in salida and "Prioridad: P1" in salida
-    assert "docs/kb-red-01.md#Pasos" in salida
-    assert entrada.preguntas == ["¿Confirmas reiniciar_servicio(servicio=vpn, oficina=MAD-01)? [s/N] "]
-
-
-@pytest.mark.parametrize("entrada", [responde("n"), responde(""), sin_terminal])
-def test_cli_sin_confirmar_escala(capsys, entrada):
-    assert cli.main(["no tengo internet", "--oficina", "MAD-01", "--traza"], entrada) == 0
-    salida = capsys.readouterr().out
-    assert "Final: escalado" in salida and "Escalado: ESC-0001" in salida
-    assert "reiniciar_servicio({" not in salida  # nunca aparece como ejecutado
+def test_cli_confirming_yes_resolves(capsys):
+    read = answers("y")
+    code = cli.main(["I have no internet", "--office", "MAD-01"], read)
+    output = capsys.readouterr().out
+    assert code == 0
+    assert "Final: resolved" in output
+    assert "Type: network" in output and "Priority: P1" in output
+    assert "docs/kb-network-01.md#Steps" in output
+    assert read.questions == ["Confirm restart_service(service=vpn, office=MAD-01)? [y/N] "]
 
 
-def test_cli_traza_numerada(capsys):
-    cli.main(["no tengo internet", "--oficina", "VAL-01", "--traza"], sin_terminal)
-    salida = capsys.readouterr().out
-    assert "Traza:" in salida
-    assert "   1. [clasificador]" in salida
-    assert "[diagnostico] consultar_servicio(" in salida
+@pytest.mark.parametrize("read", [answers("n"), answers(""), no_terminal])
+def test_cli_without_confirming_escalates(capsys, read):
+    assert cli.main(["I have no internet", "--office", "MAD-01", "--trace"], read) == 0
+    output = capsys.readouterr().out
+    assert "Final: escalated" in output and "Escalation: ESC-0001" in output
+    assert "restart_service({" not in output  # never appears as executed
 
 
-def test_cli_oficina_inexistente(capsys):
-    assert cli.main(["no tengo internet", "--oficina", "SEV-01"], sin_terminal) == 0
-    salida = capsys.readouterr().out
-    assert "Final: rechazado" in salida and "SEV-01" in salida
+def test_cli_numbered_trace(capsys):
+    cli.main(["I have no internet", "--office", "VAL-01", "--trace"], no_terminal)
+    output = capsys.readouterr().out
+    assert "Trace:" in output
+    assert "   1. [classifier]" in output
+    assert "[diagnosis] check_service(" in output
 
 
-@pytest.mark.parametrize("texto, esperado", [
-    ("s", True), ("S", True), ("si", True), ("sí", True), (" s ", True),
-    ("n", False), ("", False), ("vale", False),
+def test_cli_non_existent_office(capsys):
+    assert cli.main(["I have no internet", "--office", "SEV-01"], no_terminal) == 0
+    output = capsys.readouterr().out
+    assert "Final: rejected" in output and "SEV-01" in output
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("y", True), ("Y", True), ("yes", True), (" y ", True),
+    ("n", False), ("", False), ("ok", False),
 ])
-def test_confirmador(texto, esperado):
-    accion = Accion("reiniciar_servicio", {"servicio": "vpn", "oficina": "MAD-01"})
-    assert cli.confirmador(responde(texto))(accion) is esperado
+def test_confirmer(text, expected):
+    action = Action("restart_service", {"service": "vpn", "office": "MAD-01"})
+    assert cli.confirmer(answers(text))(action) is expected
 
 
-# --- Criterio 7: --modelo hf sin token ------------------------------------------
+# --- Criterion 7: --model hf without a token ------------------------------------------
 
-def test_cli_hf_sin_token(capsys):
-    codigo = cli.main(["no tengo internet", "--oficina", "MAD-01", "--modelo", "hf"],
-                      sin_terminal)
-    capturado = capsys.readouterr()
-    assert codigo == 2
-    assert "HF_TOKEN" in capturado.err
-    assert "Traceback" not in capturado.err and capturado.out == ""
+def test_cli_hf_without_token(capsys):
+    code = cli.main(["I have no internet", "--office", "MAD-01", "--model", "hf"],
+                    no_terminal)
+    captured = capsys.readouterr()
+    assert code == 2
+    assert "HF_TOKEN" in captured.err
+    assert "Traceback" not in captured.err and captured.out == ""
 
 
-# --- Criterio 8: pyproject y --help ----------------------------------------------
+# --- Criterion 8: pyproject and --help ----------------------------------------------
 
-def test_pyproject_apunta_a_cli():
-    datos = tomllib.loads((RAIZ / "pyproject.toml").read_text(encoding="utf-8"))
-    assert datos["project"]["scripts"]["soporte-oficinas"] == "soporte_oficinas.cli:main"
+def test_pyproject_points_to_cli():
+    data = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    assert data["project"]["scripts"]["office-support"] == "office_support.cli:main"
 
 
 def test_help(capsys):
-    with pytest.raises(SystemExit) as salida:
+    with pytest.raises(SystemExit) as exit_:
         cli.main(["--help"])
-    assert salida.value.code == 0
-    assert "--oficina" in capsys.readouterr().out
+    assert exit_.value.code == 0
+    assert "--office" in capsys.readouterr().out
 
 
-def test_oficina_obligatoria(capsys):
-    with pytest.raises(SystemExit) as salida:
-        cli.main(["no tengo internet"])
-    assert salida.value.code == 2
+def test_office_is_required(capsys):
+    with pytest.raises(SystemExit) as exit_:
+        cli.main(["I have no internet"])
+    assert exit_.value.code == 2

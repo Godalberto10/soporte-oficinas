@@ -1,9 +1,0 @@
-Final: rechazado
-Tipo: fuera_de_ambito · Prioridad: -
-
-Respuesta al empleado:
-No se tramita la solicitud: la petición no es una incidencia de soporte de oficinas.
-
-Traza:
-   1. [clasificador] respuesta -> {"tipo": "fuera_de_ambito", "prioridad": "P4", "motivo": "La solicitud no es una incidencia de soporte técnico relacionada con la red de oficinas."}
-   2. [orquestador] nota -> rechazado: la petición no es una incidencia de soporte de oficinas

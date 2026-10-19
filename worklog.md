@@ -1,547 +1,641 @@
-# Bitácora
+# Worklog
 
-## Hito 0 — Esqueleto del proyecto
-**Qué se hizo:** `uv init --package` (soporte_oficinas, Python 3.12); dependencias
-huggingface-hub y python-dotenv; pytest como dependencia de desarrollo;
-carpetas data/, docs/, tests/, .claude/commands/.
-**Decisiones:** Python sin framework de agentes; orquestación por traspaso;
-web con Streamlit como último hito (8), solo como capa sobre `orquestar()`.
-**Problema:** `uv add --dev pytest` falló (os error 396) porque la carpeta está
-en OneDrive y no admite hardlinks.
-**Solución:** `link-mode = "copy"` en `[tool.uv]` del pyproject.toml.
-**Rechazado:** —
+## Milestone 0 — Project skeleton
+**What was done:** `uv init --package` (office_support, Python 3.12); dependencies
+huggingface-hub and python-dotenv; pytest as a dev dependency;
+folders data/, docs/, tests/, .claude/commands/.
+**Decisions:** Python without an agent framework; handoff orchestration;
+Streamlit web as the last milestone (8), only as a layer on top of `orchestrate()`.
+**Problem:** `uv add --dev pytest` failed (os error 396) because the folder is
+on OneDrive and does not support hardlinks.
+**Solution:** `link-mode = "copy"` in `[tool.uv]` of pyproject.toml.
+**Rejected:** —
 
-## Hito 0b — Permisos (.claude/settings.json)
-**Qué se hizo:** permisos con mínimo privilegio.
-- allow: `uv run pytest`, `git status`, `git diff` (solo leen o prueban).
-- ask: `uv add/remove` (cada dependencia la decido yo), `uv run python` y el
-  programa (pueden llamar al modelo real con mi token), `git add/commit`.
-- deny: leer o editar `.env` (el token no entra en el contexto del modelo),
-  `git push`, `rm`, `curl`, `WebFetch` (no publicar, borrar ni sacar datos).
-**Comprobación:** Claude Code tuvo denegado leer .env y hacer git push (dos
-intentos reales bloqueados por settings.json).
-**GitHub:** repositorio privado Godalberto10/soporte-oficinas; un commit por
-hito; el push lo hago yo.
-**Rechazado:** —
+## Milestone 0b — Permissions (.claude/settings.json)
+**What was done:** least-privilege permissions.
+- allow: `uv run pytest`, `git status`, `git diff` (they only read or test).
+- ask: `uv add/remove` (I decide every dependency), `uv run python` and the
+  program (they can call the real model with my token), `git add/commit`.
+- deny: reading or editing `.env` (the token never enters the model's context),
+  `git push`, `rm`, `curl`, `WebFetch` (no publishing, deleting or exfiltrating data).
+**Check:** Claude Code was denied reading .env and running git push (two
+real attempts blocked by settings.json).
+**GitHub:** private repository Godalberto10/soporte-oficinas; one commit per
+milestone; I do the push.
+**Rejected:** —
 
-## Hito 0c — Token de Hugging Face
-**Qué se hizo:** token fine-grained ("Make calls to Inference Providers") en
-`.env` como `HF_TOKEN`; `.env` ignorado por git.
-**Comprobación:** `whoami()` devuelve el usuario sin mostrar el token; el token
-nunca se pegó en el chat.
-**Rechazado:** —
+## Milestone 0c — Hugging Face token
+**What was done:** fine-grained token ("Make calls to Inference Providers") in
+`.env` as `HF_TOKEN`; `.env` ignored by git.
+**Check:** `whoami()` returns the user without showing the token; the token
+was never pasted into the chat.
+**Rejected:** —
 
-## Hito 0d — CLAUDE.md
-**Orden lanzada:** pedí a Claude Code un borrador del CLAUDE.md a partir de mis
-decisiones: 5 tipos (red, impresora, acceso_aplicacion, correo, hardware + otro),
-prioridad por alcance (P1–P4), críticos vpn/correo/erp/ficheros, horario L-V 08–18.
-**Diferencias aceptadas:** contratos JSON de los 4 agentes; firma de `orquestar()`
-con `confirmar` y `ahora` inyectables; guardarraíl (crítico en horario solo si es
-el servicio diagnosticado y está caído o degradado; máx. 1 reinicio por servicio);
-ticket reabierto → escalado directo; oficinas MAD-01, MAD-02, BCN-01, VAL-01;
-tope de 12 pasos; 2 respuestas ilegibles seguidas → escalado.
-**Diferencias rechazadas:** ninguna en esta versión (147 líneas, < 200).
+## Milestone 0d — CLAUDE.md
+**Command launched:** I asked Claude Code for a draft of CLAUDE.md based on my
+decisions: 5 types (network, printer, app_access, email, hardware + other),
+priority by scope (P1–P4), critical vpn/email/erp/files, hours Mon–Fri 08–18.
+**Accepted differences:** JSON contracts of the 4 agents; signature of `orchestrate()`
+with injectable `confirm` and `now`; guardrail (a critical service during business
+hours only if it is the diagnosed service and is down or degraded; max. 1 restart per service);
+reopened ticket → direct escalation; offices MAD-01, MAD-02, BCN-01, VAL-01;
+limit of 12 steps; 2 unreadable responses in a row → escalation.
+**Rejected differences:** none in this version (147 lines, < 200).
 
-## Hito 1 — Datos y documentos
-**Orden lanzada:** `/hito1` (.claude/commands/hito1.md).
-**Qué se hizo:** `data/servicios.json` (4 oficinas × 7 servicios),
-`data/inventario.json` (14 equipos), `data/tickets.json` (10 tickets);
-`docs/` con 10 artículos `kb-<tipo>-NN.md` (2 por tipo) y las 4 políticas;
-`tests/test_datos.py` (45 pruebas, una o más por criterio de aceptación).
-**Casos difíciles en los datos:**
-- Mismo síntoma, causa distinta: "no tengo internet" en T-0001 (MAD-01, `vpn`
-  caída) y T-0002 (VAL-01, servicios ok, PC-VAL01-002 con tarjeta de red averiada).
-- Ticket reabierto: T-0007 (MAD-02, impresora, 2 reaperturas).
-- Avería multioficina: `erp` caído en MAD-02 y BCN-01.
-**Decisión — intranet pasa a crítica:** el borrador la tenía como no crítica.
-La cambié porque por la intranet pasa el autoservicio de contraseñas y es un
-punto sensible para la seguridad de la red interna. Consecuencias: intranet
-caída → P1, degradada → P2; en horario laboral solo se reinicia si es el
-servicio diagnosticado y está caída o degradada. Actualizados CLAUDE.md, las 4
-políticas, `CRITICOS` en la prueba y la intranet de VAL-01 (de `degradado` a
-`ok`, para que VAL-01 siga siendo el caso de avería de equipo).
-**Comprobación:** al cambiar la lista, `test_mismo_sintoma_causas_distintas`
-falló como se esperaba; tras corregir el dato, `uv run pytest` en verde (45).
-**Coherencia:** las pruebas leen las reglas P1–P4 y la lista de críticos de
-CLAUDE.md y exigen que coincidan con las políticas.
-**Rechazado:** —
+## Milestone 1 — Data and documents
+**Command launched:** `/data-and-docs` (.claude/commands/data-and-docs.md).
+**What was done:** `data/services.json` (4 offices × 7 services),
+`data/inventory.json` (14 devices), `data/tickets.json` (10 tickets);
+`docs/` with 10 articles `kb-<type>-NN.md` (2 per type) and the 4 policies;
+`tests/test_data.py` (45 tests, one or more per acceptance criterion).
+**Hard cases in the data:**
+- Same symptom, different cause: "I have no internet" in T-0001 (MAD-01, `vpn`
+  down) and T-0002 (VAL-01, services ok, PC-VAL01-002 with a faulty network card).
+- Reopened ticket: T-0007 (MAD-02, printer, 2 reopenings).
+- Multi-office outage: `erp` down in MAD-02 and BCN-01.
+**Decision — intranet becomes critical:** the draft had it as non-critical.
+I changed it because password self-service goes through the intranet and it is a
+sensitive point for the security of the internal network. Consequences: intranet
+down → P1, degraded → P2; during business hours it is only restarted if it is the
+diagnosed service and is down or degraded. Updated CLAUDE.md, the 4
+policies, `CRITICAL` in the test and the VAL-01 intranet (from `degraded` to
+`ok`, so that VAL-01 remains the device-failure case).
+**Check:** when the list changed, `test_same_symptom_different_causes`
+failed as expected; after fixing the data, `uv run pytest` green (45).
+**Consistency:** the tests read the P1–P4 rules and the list of critical services from
+CLAUDE.md and require them to match the policies.
+**Rejected:** —
 
-## Hito 2 — Orden `/hito2`
-**Orden lanzada:** pedí a Claude Code un borrador de `.claude/commands/hito2.md`
-(estado.py, modelo.py, herramientas.py y sus pruebas) siguiendo el formato de hito1.
-**Decisiones del borrador que acepté:** `ModeloHF` se deja para el hito 6 y
-`buscar_docs` para el hito 3 (no adelantar hitos); clase `Red` que carga los JSON
-desde una ruta y aplica los cambios solo en memoria (las pruebas no ensucian
-`data/`); confirmación y guardarraíl fuera de las herramientas (son del orquestador).
-**Mejoras que propuso Claude y acepté tras revisarlo:**
-1. `crear_herramientas(red)` conserva las firmas de CLAUDE.md, y `ejecutar(...)`
-   es el único punto de llamada: herramienta inexistente o argumentos mal formados
-   → `ErrorHerramienta`, comprobando la firma con `inspect.signature().bind` para
-   no ocultar fallos internos. Motivo: el orquestador solo captura un tipo de error (R4).
-2. Campos de `Resultado` fijados (`final`, `respuesta`, `citas`, `traza`, `tipo`,
-   `prioridad`, `escalado`), porque CLAUDE.md no los listaba y la evaluación del
-   hito 7 comprueba `final`, tipo y prioridad.
-3. Cada `Red` con su propia copia de los datos y prueba de aislamiento, para que
-   el máximo de 1 reinicio por servicio no se mezcle entre ejecuciones.
-**Rechazado / aplazado:** `parametros` en el registro (se verá en el hito 4, al
-escribir los prompts) y tipos `Literal` (mejora menor).
+## Milestone 2 — Command `/state-and-tools`
+**Command launched:** I asked Claude Code for a draft of `.claude/commands/state-and-tools.md`
+(state.py, model.py, tools.py and their tests) following the format of data-and-docs.
+**Draft decisions I accepted:** `HFModel` is left for milestone 6 and
+`search_docs` for milestone 3 (no getting ahead of milestones); a `Network` class that loads the JSON
+from a path and applies changes only in memory (tests do not dirty
+`data/`); confirmation and guardrail outside the tools (they belong to the orchestrator).
+**Improvements Claude proposed and I accepted after reviewing them:**
+1. `create_tools(network)` keeps the CLAUDE.md signatures, and `execute(...)`
+   is the only call point: nonexistent tool or malformed arguments
+   → `ToolError`, checking the signature with `inspect.signature().bind` so as
+   not to hide internal failures. Reason: the orchestrator only catches one error type (R4).
+2. Fields of `Result` fixed (`final`, `answer`, `citations`, `trace`, `type`,
+   `priority`, `escalation`), because CLAUDE.md did not list them and the evaluation of
+   milestone 7 checks `final`, type and priority.
+3. Each `Network` with its own copy of the data and an isolation test, so that
+   the maximum of 1 restart per service does not leak between runs.
+**Rejected / postponed:** `parameters` in the registry (to be seen in milestone 4, when
+writing the prompts) and `Literal` types (minor improvement).
 
-## Hito 2 — Estado, modelo simulado y herramientas
-**Orden lanzada:** `/hito2`.
-**Qué se hizo:** `estado.py` (Paso, Accion, Estado, Resultado), `modelo.py`
-(Protocol `Modelo` y `ScriptedModel`, que guarda las llamadas recibidas),
-`herramientas.py` (`Red`, `ErrorHerramienta`, `Herramienta`,
-`crear_herramientas`, `ejecutar` y las 6 herramientas; `buscar_docs` queda
-para el hito 3). Pruebas: `test_estado.py`, `test_modelo.py`, `test_herramientas.py`.
-**Decisiones de implementación:** cada herramienta se ata a su `Red` con
-`functools.partial` y conserva la firma de CLAUDE.md; los argumentos se
-validan como texto, para que una lista o un número enviados por el modelo den
-`ErrorHerramienta`; `crear_escalado` admite `ticket=None` (el ticket es
-opcional); todas las herramientas devuelven `dict` (`buscar_tickets` →
+## Milestone 2 — State, simulated model and tools
+**Command launched:** `/state-and-tools`.
+**What was done:** `state.py` (Step, Action, State, Result), `model.py`
+(`Model` Protocol and `ScriptedModel`, which stores the calls it receives),
+`tools.py` (`Network`, `ToolError`, `Tool`,
+`create_tools`, `execute` and the 6 tools; `search_docs` is left
+for milestone 3). Tests: `test_state.py`, `test_model.py`, `test_tools.py`.
+**Implementation decisions:** each tool is bound to its `Network` with
+`functools.partial` and keeps the CLAUDE.md signature; arguments are
+validated as text, so that a list or a number sent by the model gives
+`ToolError`; `create_escalation` accepts `ticket=None` (the ticket is
+optional); every tool returns a `dict` (`search_tickets` →
 `{"tickets": [...]}`).
-**Comprobación:** `uv run pytest` en verde (84 pruebas, 45 de test_datos).
-Pruebas clave: `ejecutar` convierte herramienta inexistente y argumentos que
-sobran o faltan en `ErrorHerramienta`, pero no oculta un `TypeError` interno;
-dos `Red` no comparten datos; la huella SHA-256 de `data/*.json` no cambia
-tras reiniciar, cerrar y escalar.
-**Rechazado:** —
+**Check:** `uv run pytest` green (84 tests, 45 from test_data).
+Key tests: `execute` turns a nonexistent tool and extra or missing
+arguments into `ToolError`, but does not hide an internal `TypeError`;
+two `Network`s do not share data; the SHA-256 fingerprint of `data/*.json` does not change
+after restarting, closing and escalating.
+**Rejected:** —
 
-## Hito 3 — Recuperación BM25 y `buscar_docs`
-**Orden lanzada:** borrador de `.claude/commands/hito3.md` escrito por Claude
-Code a petición mía; lo revisé (qué es BM25, para qué sirve el hito, por qué
-no se adelanta un agente) y lancé `/hito3` sin cambios.
-**Qué se hizo:** `recuperacion.py` (tokenizar, trocear por secciones `## `,
-`IndiceBM25` escrito a mano, `cita`), `buscar_docs` como 7.ª herramienta del
-registro (`{"fragmentos": [...]}`, reversible, k entre 1 y 10) e índice
-inyectable en `crear_herramientas(red, indice)`. Pruebas en
-`test_recuperacion.py` y ampliación de `test_herramientas.py`.
-**Decisiones:** unidad de recuperación = sección, con el título del documento
-para distinguir secciones homónimas; cita `docs/<fichero>.md#<seccion>`;
-sin tildes ni palabras vacías; k1=1.5, b=0.75; empates por doc y sección.
-Por qué BM25 y no embeddings: sin dependencias ni red, determinista y explicable.
-**Problema:** "reiniciar un servicio crítico en horario laboral" acertaba
-`politica-reinicios.md` por muy poco (×1,02 frente a `kb-impresora-02.md`,
-que también habla de reiniciar en horario laboral) y "reinicio" ≠ "reiniciar".
-**Solución:** reducción a raíz ligera (sin plural ni vocal final, 6 letras) y
-título con peso 3. Claude probó 12 combinaciones (longitud de raíz × peso) sobre
-12 consultas y acepté la de mayor margen mínimo: ahora ×1,27 y ×1,46. Nueva prueba
-`test_margen_politica_reinicios` (exige ≥ 1,2; con el código anterior fallaba).
-**Coste aceptado:** "tiempos de respuesta por prioridad" baja de ×2,3 a ×1,17
-porque "tiempo" coincide con `procedimiento-escalado.md`; sigue acertando.
-**Limitación conocida:** BM25 no entiende sinónimos ("sin conexión" ≠ "no
-tengo internet"); se mitiga con las expresiones de los empleados en `## Síntomas`.
-**Comprobación:** `uv run pytest` en verde (124 pruebas).
-**Rechazado:** adelantar el agente de conocimiento a este hito (se hace al
-empezar el hito 4, junto con el bucle común de los agentes).
+## Milestone 3 — BM25 retrieval and `search_docs`
+**Command launched:** draft of `.claude/commands/bm25-retrieval.md` written by Claude
+Code at my request; I reviewed it (what BM25 is, what the milestone is for, why
+an agent is not brought forward) and launched `/bm25-retrieval` unchanged.
+**What was done:** `retrieval.py` (tokenize, chunk by `## ` sections,
+hand-written `BM25Index`, `citation`), `search_docs` as the 7th tool in the
+registry (`{"fragments": [...]}`, reversible, k between 1 and 10) and an index
+injectable into `create_tools(network, index)`. Tests in
+`test_retrieval.py` and an extension of `test_tools.py`.
+**Decisions:** retrieval unit = section, with the document title
+to tell apart sections with the same name; citation `docs/<file>.md#<section>`;
+no accents and no stop words; k1=1.5, b=0.75; ties broken by doc and section.
+Why BM25 and not embeddings: no dependencies or network, deterministic and explainable.
+**Problem:** "restart a critical service during business hours" hit
+`restart-policy.md` by a very small margin (×1.02 against `kb-printer-02.md`,
+which also talks about restarting during business hours) and "restart" (noun) ≠ "restart" (verb).
+**Solution:** light stemming (no plural or final vowel, 6 letters) and
+title with weight 3. Claude tried 12 combinations (stem length × weight) over
+12 queries and I accepted the one with the largest minimum margin: now ×1.27 and ×1.46. New test
+`test_restart_policy_margin` (requires ≥ 1.2; it failed with the previous code).
+**Accepted cost:** "response times by priority" drops from ×2.3 to ×1.17
+because "time" matches `escalation-procedure.md`; it still hits.
+**Known limitation:** BM25 does not understand synonyms ("offline" ≠ "I
+have no internet"); mitigated with the employees' expressions in `## Symptoms`.
+**Check:** `uv run pytest` green (124 tests).
+**Rejected:** bringing the knowledge agent forward to this milestone (it is done at the
+start of milestone 4, together with the common agent loop).
 
-## Hito 4 — Agentes
-**Orden lanzada:** borrador de `.claude/commands/hito4.md` escrito por Claude
-Code a petición mía; antes pedí que me explicara qué hace cada agente y lancé
-`/hito4` sin cambios.
-**Qué se hizo:** `agentes.py` con el bucle común (`ejecutar_agente`), la
-definición de los 4 agentes como datos (`AGENTES`), el prompt generado por
-código y las funciones `clasificador`, `diagnostico`, `conocimiento` y
-`escalado`. Pruebas en `test_agentes.py`. Orden de trabajo: primero bucle +
-conocimiento (porción vertical, 19 pruebas en verde) y después los otros tres.
-**Decisiones:**
-- Protocolo: un único JSON por turno, llamada `{"herramienta", "argumentos"}`
-  o salida final con las claves del contrato; se acepta dentro de ```json.
-- Las irreversibles nunca se ejecutan en el bucle: conocimiento las propone en
-  `accion` y, si las llama como turno, se bloquean y se le avisa. Así la
-  confirmación y el guardarraíl del hito 5 no se pueden saltar.
-- El prompt se genera desde el registro (firma con `inspect.signature` y
-  descripción) y solo muestra las herramientas permitidas al agente.
-- Contrato incumplido (faltan claves, `tipo` o prioridad fuera de rango) cuenta
-  como respuesta ilegible; 2 seguidas → `motivo="ilegible"`.
-- Llamadas bloqueadas quedan en la traza con `herramienta=None`, para que nunca
-  parezcan ejecutadas (regla 1).
-- Escalado: si el agente no crea el escalado, lo crea el código con su salida
-  (sin ticket si el del estado no existe); nunca se duplica.
-- La prioridad del clasificador se guarda tal cual; subirla es del hito 5.
-**Comprobación:** `uv run pytest` en verde (160 pruebas).
-**Problema:** un `cat >> ... <<'EOF'` doble en una misma orden de Bash falló
-sin escribir nada; se añadió el código con el editor.
-**Rechazado:** que el clasificador corrija ya la prioridad con los datos (se
-deja al orquestador, que tiene la información de todos los agentes).
+## Milestone 4 — Agents
+**Command launched:** draft of `.claude/commands/agents.md` written by Claude
+Code at my request; first I asked it to explain what each agent does, and I launched
+`/agents` unchanged.
+**What was done:** `agents.py` with the common loop (`run_agent`), the
+definition of the 4 agents as data (`AGENTS`), the prompt generated by
+code and the functions `classifier`, `diagnosis`, `knowledge` and
+`escalation`. Tests in `test_agents.py`. Work order: first loop +
+knowledge (vertical slice, 19 tests green) and then the other three.
+**Decisions:**
+- Protocol: a single JSON per turn, either a call `{"tool", "arguments"}`
+  or a final output with the contract keys; it is accepted inside ```json.
+- Irreversible tools are never executed in the loop: knowledge proposes them in
+  `action` and, if it calls them as a turn, they are blocked and it is warned. This way the
+  confirmation and the guardrail of milestone 5 cannot be bypassed.
+- The prompt is generated from the registry (signature with `inspect.signature` and
+  description) and only shows the tools the agent is allowed to use.
+- A broken contract (missing keys, `type` or priority out of range) counts
+  as an unreadable response; 2 in a row → `reason="unreadable"`.
+- Blocked calls stay in the trace with `tool=None`, so that they never
+  look executed (rule 1).
+- Escalation: if the agent does not create the escalation, the code creates it from its output
+  (without ticket if the one in the state does not exist); it is never duplicated.
+- The classifier's priority is stored as is; raising it belongs to milestone 5.
+**Check:** `uv run pytest` green (160 tests).
+**Problem:** a double `cat >> ... <<'EOF'` in a single Bash command failed
+without writing anything; the code was added with the editor.
+**Rejected:** having the classifier already correct the priority from the data (left
+to the orchestrator, which has the information from all the agents).
 
-## Hito 5 — Orden `/hito5`: decisión sobre `rechazado`
-**Problema:** CLAUDE.md era ambiguo: con una acción rechazada decía "final
-`escalado` o `rechazado`", pero las reglas de traspaso decían "→ escalado".
-**Decisión mía:** si el usuario rechaza la acción o no le parece bien, se
-escala a segundo nivel hasta encontrar una solución coherente; `rechazado`
-solo cuando la entrada no es válida (oficina o ticket inexistentes) o la
-petición no es de soporte de oficinas. Para lo segundo se añade el tipo
-`fuera_de_ambito` (distinto de `otro`, que es soporte sin categoría).
-Actualizados CLAUDE.md y la orden del hito 5.
-**Riesgo conocido:** detectar `fuera_de_ambito` depende del modelo; un falso
-positivo perdería una incidencia válida.
-**Rechazado:** que una acción que el usuario rechaza termine en `rechazado`: dejaría al empleado sin solución; se escala.
+## Milestone 5 — Command `/orchestrator`: decision on `rejected`
+**Problem:** CLAUDE.md was ambiguous: with a rejected action it said "final
+`escalated` or `rejected`", but the handoff rules said "→ escalation".
+**My decision:** if the user rejects the action or does not agree with it, it is
+escalated to second level until a coherent solution is found; `rejected`
+only when the input is not valid (nonexistent office or ticket) or the
+request is not office support. For the latter the type
+`out_of_scope` is added (different from `other`, which is support without a category).
+Updated CLAUDE.md and the milestone 5 command.
+**Known risk:** detecting `out_of_scope` depends on the model; a false
+positive would lose a valid incident.
+**Rejected:** having an action the user rejects end in `rejected`: it would leave the employee without a solution; it is escalated.
 
-## Hito 5 — Orquestador y reglas R1–R5
-**Orden lanzada:** `/hito5` (borrador de Claude Code con mi decisión sobre
-`rechazado` y el tipo `fuera_de_ambito`, ver entrada anterior).
-**Qué se hizo:** `orquestador.py` con `orquestar()` (firma de CLAUDE.md más
-`red` e `indice` opcionales para pruebas), `guardarrail`, `prioridad_minima`,
-`subir_prioridad`, `comprobar_citas`, `en_horario`, `trayectoria` y la
-respuesta al empleado redactada por código. Ajustes en `agentes.py`: tipo
-`fuera_de_ambito`, `Paso.n` = posición en la traza, notas del orquestador en
-el mensaje inicial y `asegurar_escalado` pública. Pruebas en `test_orquestador.py`.
-**Decisiones:**
-- La prioridad mínima se calcula con el servicio diagnosticado (no con
-  cualquier servicio de la oficina); solo se sube, nunca se baja.
-- Las anotaciones del orquestador quedan en la traza pero no cuentan para el tope.
-- El escalado nunca baja la prioridad del estado (se envuelve `crear_escalado`),
-  así la avería multioficina sale con P1 aunque el agente proponga P2.
-- Guardarraíl ampliado: no se reinicia un servicio de otra oficina, máximo 1
-  reinicio por servicio siempre, y solo se cierra el ticket de la incidencia.
-- Si el agente escalado no responde bien, el código crea el escalado con un
-  resumen automático: siempre hay id.
-**Comprobación con mutaciones:** Claude rompió a propósito cada regla (R1 sin
-confirmar, R2 sin guardarraíl, R3 sin tope antes de la acción, R4 sin escalar
-ilegibles, R5 sin comprobar citas, prioridad sin subir, reabierto sin escalar)
-y comprobé que fallan pruebas. La comprobación del tope antes de ejecutar la
-acción no la detectaba ninguna: añadí `test_r3_tope_antes_de_ejecutar_la_accion`.
-**Resultado:** `uv run pytest` en verde (198 pruebas).
-**Rechazado:** —
+## Milestone 5 — Orchestrator and rules R1–R5
+**Command launched:** `/orchestrator` (Claude Code draft with my decision on
+`rejected` and the `out_of_scope` type, see previous entry).
+**What was done:** `orchestrator.py` with `orchestrate()` (CLAUDE.md signature plus
+optional `network` and `index` for tests), `guardrail`, `minimum_priority`,
+`raise_priority`, `check_citations`, `in_business_hours`, `trajectory` and the
+answer to the employee written by code. Adjustments in `agents.py`: type
+`out_of_scope`, `Step.n` = position in the trace, orchestrator notes in
+the initial message and `ensure_escalation` made public. Tests in `test_orchestrator.py`.
+**Decisions:**
+- The minimum priority is computed with the diagnosed service (not with
+  any service of the office); it is only raised, never lowered.
+- Orchestrator notes stay in the trace but do not count towards the limit.
+- Escalation never lowers the state's priority (`create_escalation` is wrapped),
+  so the multi-office outage comes out with P1 even if the agent proposes P2.
+- Extended guardrail: a service of another office is never restarted, maximum 1
+  restart per service always, and only the incident's ticket is closed.
+- If the escalation agent does not respond properly, the code creates the escalation with an
+  automatic summary: there is always an id.
+**Check with mutations:** Claude deliberately broke each rule (R1 without
+confirming, R2 without guardrail, R3 without the limit before the action, R4 without escalating
+unreadable responses, R5 without checking citations, priority not raised, reopened not escalated)
+and I checked that tests fail. Checking the limit before executing the
+action was caught by none: I added `test_r3_limit_before_executing_the_action`.
+**Result:** `uv run pytest` green (198 tests).
+**Rejected:** —
 
-## Hito 6 — Modelo real y línea de órdenes
-**Orden lanzada:** `/hito6` (borrador de Claude Code, lanzado sin cambios).
-**Qué se hizo:** en `modelo.py`, `ModeloHF` (InferenceClient, `temperature=0`,
-`max_tokens=512`, token desde `.env` con python-dotenv) y `ModeloSimulado`
-(reglas deterministas para usar el programa sin token); `cli.py` con
-`argparse` (`--oficina`, `--ticket`, `--modelo simulado|hf`, `--traza`) y
-confirmación en terminal "[s/N]" (EOF = no); el script de `pyproject.toml`
-apunta a `soporte_oficinas.cli:main`. Pruebas en `test_modelo_hf.py` y
-`test_cli.py` con un cliente falso: ninguna usa red ni lee `.env`.
-**Decisiones:**
-- `ModeloSimulado` porque CLAUDE.md reserva `ScriptedModel` para pruebas y
-  `--modelo simulado` necesitaba funcionar solo. No imita las reglas de
-  seguridad: las sigue aplicando el orquestador.
-- Sin terminal interactiva, `confirmar` devuelve False (por seguridad).
-- El error del modelo sale en stderr con código 2, sin traza de Python y con
-  el token sustituido por `***`.
-**Comprobación con el simulado:** "no tengo internet" en MAD-01 → pregunta,
-"s" → reinicia vpn → `resuelto` con cita `kb-red-01.md#Pasos` (9 pasos, sube
-P3→P1); "no puedo entrar en el ERP" en MAD-02 → `escalado` P1, ESC-0001.
-**Prueba real con Hugging Face:**
-`uv run soporte-oficinas "no tengo internet" --oficina MAD-01 --modelo hf --traza`
-→ `402 Payment Required: You have no remaining credits` con
-`Qwen/Qwen2.5-72B-Instruct`. El programa respondió como debía: mensaje claro,
-sin token, código 2.
-**Mejora tras el error:** se reintentaba también el 402 (una llamada inútil).
-Ahora solo se reintentan fallos transitorios (red, 429, 5xx); prueba
-`test_solo_reintenta_fallos_transitorios` (401/402/404 → 1 llamada; 429/5xx → 2).
-**Pendiente:** preguntar al profesor cómo conseguir créditos (o si la
-asignatura los da) y repetir la prueba real; entonces confirmar el modelo por
-defecto en CLAUDE.md (ahora marcado "pendiente de verificar"). Alternativas
-vistas: esperar la renovación mensual, clave propia de un proveedor (p. ej.
-Groq) en los ajustes de Inference Providers, o Ollama local vía `base_url`.
-**Resultado:** `uv run pytest` en verde (239 pruebas).
-**Rechazado:** — (orden lanzada sin cambios).
+## Milestone 6 — Real model and command line
+**Command launched:** `/cli-and-hf-model` (Claude Code draft, launched unchanged).
+**What was done:** in `model.py`, `HFModel` (InferenceClient, `temperature=0`,
+`max_tokens=512`, token from `.env` with python-dotenv) and `SimulatedModel`
+(deterministic rules to use the program without a token); `cli.py` with
+`argparse` (`--office`, `--ticket`, `--model simulated|hf`, `--trace`) and
+terminal confirmation "[y/N]" (EOF = no); the `pyproject.toml` script
+points to `office_support.cli:main`. Tests in `test_model_hf.py` and
+`test_cli.py` with a fake client: none uses the network or reads `.env`.
+**Decisions:**
+- `SimulatedModel` because CLAUDE.md reserves `ScriptedModel` for tests and
+  `--model simulated` needed to work on its own. It does not imitate the safety
+  rules: the orchestrator keeps applying them.
+- Without an interactive terminal, `confirm` returns False (for safety).
+- The model error goes to stderr with exit code 2, without a Python traceback and with
+  the token replaced by `***`.
+**Check with the simulated model:** "I have no internet" in MAD-01 → asks,
+"y" → restarts vpn → `resolved` with citation `kb-network-01.md#Steps` (9 steps, raises
+P3→P1); "I can't log in to the ERP" in MAD-02 → `escalated` P1, ESC-0001.
+**Real test with Hugging Face:**
+`uv run office-support "I have no internet" --office MAD-01 --model hf --trace`
+→ `402 Payment Required: You have no remaining credits` with
+`Qwen/Qwen2.5-72B-Instruct`. The program responded as it should: clear message,
+no token, exit code 2.
+**Improvement after the error:** the 402 was also being retried (a useless call).
+Now only transient failures are retried (network, 429, 5xx); test
+`test_only_retries_transient_failures` (401/402/404 → 1 call; 429/5xx → 2).
+**Pending:** ask the professor how to get credits (or whether the
+course provides them) and repeat the real test; then confirm the default
+model in CLAUDE.md (now marked "pending verification"). Alternatives
+considered: wait for the monthly renewal, an own key from a provider (e.g.
+Groq) in the Inference Providers settings, or local Ollama via `base_url`.
+**Result:** `uv run pytest` green (239 tests).
+**Rejected:** — (command launched unchanged).
 
-## Revisión 1 — CLAUDE.md y permisos
-**Contexto:** el enunciado dice que CLAUDE.md, los permisos, las órdenes y las
-pruebas los escribe el estudiante. Desde el hito 2 había delegado mucha
-redacción en Claude Code, así que reviso todo desde el principio. Método:
-Claude me pregunta sección a sección, yo decido, Claude redacta mis decisiones
-y yo reviso el resultado.
-**Revisado y validado** (redacción original de Claude, de acuerdo con mi
-criterio): objetivo de primer nivel con escalado a segundo; entrada y salida;
-dependencias; pruebas sin red ni token; token solo en `.env`; 4 agentes con
-mínimo privilegio; traspaso; ticket reabierto → escalado; avería en varias
-oficinas → escalado P1; sin citas no hay "resuelto"; conocimiento solo propone
-las acciones irreversibles; guardarraíl ampliado (nunca otra oficina, solo el
-ticket de la incidencia, máx. 1 reinicio por servicio); la prioridad solo se
-sube; tope de 12 pasos y 2 respuestas ilegibles → escalado.
-**Mis motivos:**
-- Sin framework de agentes: controlo y entiendo todo el código; el bucle y las
-  reglas de seguridad son míos y puedo explicarlos.
-- Traspaso: el soporte es un flujo secuencial; no se puede dar una solución
-  sin conocer antes la incidencia y su causa.
-- Ticket reabierto: si ya se intentó y no se pudo, debe evaluarlo segundo nivel.
-- Confirmación humana: la máquina puede no saberlo todo o equivocarse.
-- Tope 12 / 2 ilegibles: evita bucles y limita el gasto de créditos; se
-  revisará tras la prueba con el modelo real.
-**Cambios que decidí:**
-1. Web Streamlit **publicada con enlace** para que el profesor la pruebe sin
-   descargar nada. `streamlit` pasa a dependencia permitida solo para `app.py`
-   (resuelve la contradicción de CLAUDE.md).
-2. La web pública usa solo el modelo simulado: con el real, cualquiera con el
-   enlace gastaría mis créditos. El real solo se enseña en local.
-3. "Fuera de alcance" explícito y qué se dice al empleado si no se resuelve.
-4. El modelo real solo se usa cuando yo lo pido.
-5. "Forma de trabajar": autoría (decido yo, Claude redacta y yo reviso) y git
-   (un commit por hito o bloque; el push lo hago yo).
-6. Los casos de evaluación y su resultado esperado los defino yo sin mirar el
-   código (oráculo independiente).
-7. `settings.json`: `Read(./.env)` no impedía `cat .env` por terminal ni
-   borrar con `del`/`Remove-Item`. Añadidos al deny `cat|type|more|head|tail|
-   less|Get-Content .env*` y `del`, `rmdir`, `Remove-Item`.
-**Comprobación:** `cat .env.noexiste` y `del archivo_que_no_existe.txt`
-denegados por settings (ficheros inexistentes, sin riesgo de leer el token);
-`uv run pytest` en verde (239); CLAUDE.md 173 líneas.
-**Aprendido:** crear otro token no da más créditos (son de la cuenta, no del
-token); el 402 no se reintenta porque es un error permanente.
-**Limitación conocida:** los permisos son una barrera, no una garantía: un
-`uv run python` podría leer `.env`, pero está en "ask" y lo vería yo.
-**Dudas abiertas:** plataforma de la web (hito 8); créditos de HF para la
-prueba real.
-**Rechazado:** un framework de agentes (no podría explicar el bucle); una página HTML en claude.ai en vez de Streamlit (no ejecutaría mi código Python real ni estaría en el repositorio); el modelo real en la web pública (cualquiera gastaría mis créditos); subir el tope a 15 o bajarlo a 10 (se mantiene 12 hasta medir).
+## Review 1 — CLAUDE.md and permissions
+**Context:** the assignment says that CLAUDE.md, the permissions, the commands and the
+tests are written by the student. Since milestone 2 I had delegated a lot of
+drafting to Claude Code, so I review everything from the beginning. Method:
+Claude asks me section by section, I decide, Claude drafts my decisions
+and I review the result.
+**Reviewed and validated** (Claude's original wording, in line with my
+judgement): first-level goal with escalation to second level; input and output;
+dependencies; tests without network or token; token only in `.env`; 4 agents with
+least privilege; handoff; reopened ticket → escalation; outage in several
+offices → escalation P1; no citations, no "resolved"; knowledge only proposes
+irreversible actions; extended guardrail (never another office, only the
+incident's ticket, max. 1 restart per service); priority is only
+raised; limit of 12 steps and 2 unreadable responses → escalation.
+**My reasons:**
+- No agent framework: I control and understand all the code; the loop and the
+  safety rules are mine and I can explain them.
+- Handoff: support is a sequential flow; a solution cannot be given
+  without first knowing the incident and its cause.
+- Reopened ticket: if it was already tried and could not be fixed, second level must assess it.
+- Human confirmation: the machine may not know everything or may be wrong.
+- Limit 12 / 2 unreadable: avoids loops and limits credit spending; to be
+  revisited after the test with the real model.
+**Changes I decided:**
+1. Streamlit web **published with a link** so the professor can try it without
+   downloading anything. `streamlit` becomes an allowed dependency only for `app.py`
+   (resolves the contradiction in CLAUDE.md).
+2. The public web uses only the simulated model: with the real one, anyone with the
+   link would spend my credits. The real one is only shown locally.
+3. Explicit "Out of scope" and what the employee is told if it is not resolved.
+4. The real model is only used when I ask for it.
+5. "Way of working": authorship (I decide, Claude drafts and I review) and git
+   (one commit per milestone or block; I do the push).
+6. The evaluation cases and their expected result are defined by me without looking at the
+   code (independent oracle).
+7. `settings.json`: `Read(./.env)` did not prevent `cat .env` from the terminal nor
+   deleting with `del`/`Remove-Item`. Added to deny `cat|type|more|head|tail|
+   less|Get-Content .env*` and `del`, `rmdir`, `Remove-Item`.
+**Check:** `cat .env.noexiste` and `del archivo_que_no_existe.txt`
+denied by settings (nonexistent files, no risk of reading the token);
+`uv run pytest` green (239); CLAUDE.md 173 lines.
+**Learned:** creating another token does not give more credits (they belong to the account, not the
+token); the 402 is not retried because it is a permanent error.
+**Known limitation:** permissions are a barrier, not a guarantee: a
+`uv run python` could read `.env`, but it is in "ask" and I would see it.
+**Open questions:** web platform (milestone 8); HF credits for the
+real test.
+**Rejected:** an agent framework (I could not explain the loop); an HTML page on claude.ai instead of Streamlit (it would not run my real Python code nor be in the repository); the real model on the public web (anyone would spend my credits); raising the limit to 15 or lowering it to 10 (12 is kept until measured).
 
-## Revisión 2 — Órdenes de los hitos 2 a 6
-**Contexto:** las órdenes `hito2.md` a `hito6.md` las redactó Claude Code a
-petición mía. Las he revisado una a una: Claude me explicó cada decisión que
-había tomado sin consultarme y yo la acepté o la cambié. Las órdenes se
-quedan como se lanzaron (son el registro de lo que se pidió); lo que cambio
-se aplica en hitos posteriores.
-**Hito 2 — aceptado:** cambios solo en memoria (cada ejecución parte del
-estado inicial; la demo siempre empieza igual); `ejecutar` como único punto
-de llamada con un solo tipo de error (R4); confirmación y guardarraíl en el
-orquestador, no repartidos por las herramientas.
-**Hito 3 — aceptado:** BM25 a mano en vez de librería o embeddings (sin
-dependencias, determinista y explicable), con la limitación de que no entiende
-sinónimos; fragmento = sección, para citas precisas; sin tildes ni palabras
-vacías, raíz ligera y título con peso 3. Valido la tabla de 7 consultas de
-prueba. Aprendido: estas pruebas comprueban una pieza aislada; la web prueba
-el sistema entero y el buscador se ve en la traza y en la cita.
-**Hito 4 — aceptado:** prompt generado por código (nunca anuncia una
-herramienta prohibida); cada agente recibe un resumen de lo averiguado y no la
-conversación entera (menos créditos y menos confusión); el escalado siempre
-termina con id aunque el modelo falle (degradación segura).
-**Hito 5 — aceptado:** la respuesta al empleado la redacta el código con
-plantilla (el modelo no puede prometer plazos falsos) y valido los tiempos
-P1 15 min, P2 30 min, P3 2 h, P4 1 día laborable; la prioridad mínima se
-calcula solo con el servicio diagnosticado; las notas del orquestador no
-cuentan para el tope.
-**Hito 6 — aceptado:** sin terminal para confirmar, la respuesta es "no";
-mantengo `Qwen/Qwen2.5-72B-Instruct` hasta probarlo con créditos.
-**Hito 6 — cambio que decidí:** el `ModeloSimulado` es el que usará la web
-pública y tiene dos huecos visibles: clasifica "¿me recomiendas un
-restaurante?" como `otro` en vez de `fuera_de_ambito` y no reconoce frases sin
-sus palabras clave ("estoy sin conexión"). Se mejora en el hito 8, antes de
-publicar la web; las reglas de seguridad no cambian porque son del orquestador.
-**Rechazado:** dejar el simulado con sus huecos (lo verá el profesor en la web); empezar por un modelo de HF pequeño y barato (mantengo el de 72B).
+## Review 2 — Commands of milestones 2 to 6
+**Context:** the commands `state-and-tools.md` to `cli-and-hf-model.md` were drafted by Claude Code at
+my request. I have reviewed them one by one: Claude explained every decision it
+had made without asking me and I accepted or changed it. The commands
+stay as they were launched (they are the record of what was asked); what I change
+is applied in later milestones.
+**Milestone 2 — accepted:** changes only in memory (each run starts from the
+initial state; the demo always starts the same); `execute` as the only call
+point with a single error type (R4); confirmation and guardrail in the
+orchestrator, not spread across the tools.
+**Milestone 3 — accepted:** hand-written BM25 instead of a library or embeddings (no
+dependencies, deterministic and explainable), with the limitation that it does not understand
+synonyms; fragment = section, for precise citations; no accents or stop
+words, light stemming and title with weight 3. I validate the table of 7 test
+queries. Learned: these tests check an isolated piece; the web tests
+the whole system and the search engine is visible in the trace and in the citation.
+**Milestone 4 — accepted:** prompt generated by code (it never announces a
+forbidden tool); each agent receives a summary of what has been found out and not the
+whole conversation (fewer credits and less confusion); escalation always
+ends with an id even if the model fails (safe degradation).
+**Milestone 5 — accepted:** the answer to the employee is written by the code from a
+template (the model cannot promise false deadlines) and I validate the times
+P1 15 min, P2 30 min, P3 2 h, P4 1 business day; the minimum priority is
+computed only with the diagnosed service; orchestrator notes do not
+count towards the limit.
+**Milestone 6 — accepted:** without a terminal to confirm, the answer is "no";
+I keep `Qwen/Qwen2.5-72B-Instruct` until testing it with credits.
+**Milestone 6 — change I decided:** `SimulatedModel` is the one the public web
+will use and it has two visible gaps: it classifies "can you recommend a
+restaurant?" as `other` instead of `out_of_scope` and it does not recognise sentences without
+its keywords ("I'm offline"). It is improved in milestone 8, before
+publishing the web; the safety rules do not change because they belong to the orchestrator.
+**Rejected:** leaving the simulated model with its gaps (the professor will see it on the web); starting with a small, cheap HF model (I keep the 72B one).
 
-## Hito 7 — Evaluación con mis casos
-**Orden lanzada:** `/hito7`. Sustituye a un borrador anterior de Claude: la
-tabla de casos y lo esperado son míos. Claude redactó la orden a partir de mi
-tabla e implementó `evaluacion.py` y `tests/test_evaluacion.py`.
-**Cómo definí lo esperado:** apliqué mis reglas con un método de 7 preguntas en
-orden (¿entrada válida? ¿es soporte? tipo, prioridad, ¿reabierto o varias
-oficinas?, ¿hay artículo?, ¿acción irreversible y confirmación?). Al aplicarlo
-me equivoqué en tres casos y los corregí al revisar la regla: en el 1 puse P3
-(la vpn caída es un crítico caído → P1), en el 6 puse P1 (el correo está
-degradado, no caído → P2) y en el 10 pensé que se reiniciaba (el guardarraíl
-bloquea sin preguntar porque el erp no es el servicio diagnosticado).
-Añadí el caso 11 ("me va lento el ordenador") tras probar el programa con una
-frase mía: el simulado lo daba por resuelto citando el artículo de la tarjeta
-de red.
-**Casos:** 11 (felices, los tres difíciles del enunciado, prioridades que sube
-el código, R1, R2, R5, entrada no válida, fuera de ámbito y el mío). Cada uno
-con dos pasadas: guion (`ScriptedModel`, comprueba mis reglas) y
-`ModeloSimulado` (lo que vería un usuario sin token). Sin modelo real: gastaría
-créditos.
-**Resultado:** con guion 9/11; con el simulado 6/9. Los fallos quedan como
-`xfail` con su motivo, sin cambiar lo esperado ni el código:
-- Guion 7: un rechazo fuera de ámbito conserva la prioridad P4 del
-  clasificador. **Fallo del código**: lo que no se tramita no tiene prioridad.
-- Guion 11: no hay artículo de equipos lentos; la cita se elimina (R5) y se
-  escala. **Falta contenido** en `docs/`.
-- Simulado 4: escala bien pero con P3 (el simulado siempre empieza en P3).
-- Simulado 7: trata el restaurante como `otro` y lo "resuelve".
-- Simulado 11: acierta el final por casualidad (resuelto, C-D-K) con tipo,
-  prioridad y artículo equivocados. Prueba de que hay que evaluar también la
-  trayectoria y los datos, no solo el final.
-**Comprobación:** `uv run pytest` → 260 en verde y 5 `xfail`;
-`python -m soporte_oficinas.evaluacion [--modelo simulado]` imprime la tabla.
-**Decisiones para el hito 7b:** rechazado sin prioridad (D1); artículo
-`kb-hardware-03`; simulado con más palabras clave, `fuera_de_ambito`, P4 para
-impresoras (D2) y sin citar artículos de otro tipo.
-**Rechazado:** el borrador de casos de Claude (evaluación circular: el mismo autor define el código y lo correcto); evaluar con el modelo real (gastaría créditos); cambiar lo esperado o el código para que los casos pasen.
+## Milestone 7 — Evaluation with my cases
+**Command launched:** `/evaluation`. It replaces an earlier Claude draft: the
+case table and the expectations are mine. Claude drafted the command from my
+table and implemented `evaluation.py` and `tests/test_evaluation.py`.
+**How I defined the expectations:** I applied my rules with a 7-question method in
+order (valid input? is it support? type, priority, reopened or several
+offices?, is there an article?, irreversible action and confirmation?). While applying it
+I got three cases wrong and corrected them when reviewing the rule: in case 1 I put P3
+(the vpn down is a critical service down → P1), in case 6 I put P1 (email is
+degraded, not down → P2) and in case 10 I thought it was restarted (the guardrail
+blocks without asking because the erp is not the diagnosed service).
+I added case 11 ("my computer is slow") after trying the program with a
+sentence of my own: the simulated model marked it resolved citing the network card
+article.
+**Cases:** 11 (happy paths, the three hard ones from the assignment, priorities raised
+by the code, R1, R2, R5, invalid input, out of scope and mine). Each one
+with two passes: script (`ScriptedModel`, checks my rules) and
+`SimulatedModel` (what a user without a token would see). No real model: it would spend
+credits.
+**Result:** with script 9/11; with the simulated model 6/9. The failures are left as
+`xfail` with their reason, without changing the expectations or the code:
+- Script 7: an out-of-scope rejection keeps the classifier's P4
+  priority. **Code bug**: what is not processed has no priority.
+- Script 11: there is no article on slow computers; the citation is removed (R5) and it is
+  escalated. **Missing content** in `docs/`.
+- Simulated 4: escalates correctly but with P3 (the simulated model always starts at P3).
+- Simulated 7: treats the restaurant as `other` and "resolves" it.
+- Simulated 11: gets the final right by chance (resolved, C-D-K) with the wrong type,
+  priority and article. Proof that the trajectory and the data must also be
+  evaluated, not only the final.
+**Check:** `uv run pytest` → 260 green and 5 `xfail`;
+`python -m office_support.evaluation [--model simulated]` prints the table.
+**Decisions for milestone 7b:** rejected without priority (D1); article
+`kb-hardware-03`; simulated model with more keywords, `out_of_scope`, P4 for
+printers (D2) and not citing articles of another type.
+**Rejected:** Claude's draft of cases (circular evaluation: the same author defines the code and what is correct); evaluating with the real model (it would spend credits); changing the expectations or the code so that the cases pass.
 
-## Hito 7b — Arreglos tras la evaluación
-**Orden lanzada:** `/hito7b`, redactada por Claude con mis decisiones sobre
-los 5 fallos del hito 7. Regla: arreglar la causa, nunca cambiar lo esperado.
-**Decisiones (mías):**
-- D1: un rechazo no tiene prioridad (lo que no se tramita no se prioriza).
-  Era un fallo del código que encontró mi caso 7.
-- Artículo `kb-hardware-03.md` "El equipo va lento" con mi procedimiento:
-  reiniciar, cerrar programas y, si sigue igual, contactar con el equipo técnico.
-- ModeloSimulado (lo usará la web): más palabras de hardware; `fuera_de_ambito`
-  si no encaja en ningún tipo ni suena a soporte; P4 inicial para impresoras
-  (D2: suele haber otra disponible); no cita artículos de otro tipo.
-**Propuesta de Claude que acepté:** en el simulado, P4 inicial si la
-incidencia habla de lentitud ("lento", "tarda", "se cuelga"), aplicando mi
-definición de P4 (molestia con alternativa). El orquestador la sigue subiendo
-con los datos: en el caso 6 el correo empieza en P4 y acaba en P2.
-**Comprobación:** las marcas `xfail(strict=True)` avisaron de cada arreglo
-(XPASS) y después se quitaron. Evaluación: guion 11/11, simulado 9/9.
-Pruebas nuevas: rechazo sin prioridad, búsqueda "me va lento el ordenador" →
-`kb-hardware-03`, clasificación y prioridad inicial del simulado, y que no
-cite un artículo de otro tipo. `uv run pytest` → 276 en verde.
-**Limitación conocida:** el simulado sigue funcionando por palabras clave; una
-frase sin ninguna conocida puede acabar en `fuera_de_ambito` por error. Con
-el modelo real lo decide el clasificador.
-**Rechazado:** aceptar que un rechazo tenga P4 (opción b de D1); dejar los fallos del simulado como limitación sin arreglarlos.
+## Milestone 7b — Fixes after the evaluation
+**Command launched:** `/evaluation-fixes`, drafted by Claude with my decisions on
+the 5 failures of milestone 7. Rule: fix the cause, never change the expectations.
+**Decisions (mine):**
+- D1: a rejection has no priority (what is not processed is not prioritised).
+  It was a code bug found by my case 7.
+- Article `kb-hardware-03.md` "The computer is slow" with my procedure:
+  restart, close programs and, if nothing changes, contact the technical team.
+- SimulatedModel (the web will use it): more hardware words; `out_of_scope`
+  if it fits no type and does not sound like support; initial P4 for printers
+  (D2: there is usually another one available); does not cite articles of another type.
+**Claude's proposal that I accepted:** in the simulated model, initial P4 if the
+incident talks about slowness ("slow", "takes long", "freezes"), applying my
+definition of P4 (an inconvenience with an alternative). The orchestrator still raises it
+from the data: in case 6 email starts at P4 and ends at P2.
+**Check:** the `xfail(strict=True)` marks flagged each fix
+(XPASS) and were then removed. Evaluation: script 11/11, simulated 9/9.
+New tests: rejection without priority, search "my computer is slow" →
+`kb-hardware-03`, classification and initial priority of the simulated model, and that it does not
+cite an article of another type. `uv run pytest` → 276 green.
+**Known limitation:** the simulated model still works by keywords; a
+sentence without any known one may end up in `out_of_scope` by mistake. With
+the real model the classifier decides.
+**Rejected:** accepting that a rejection has P4 (option b of D1); leaving the simulated model's failures as a limitation without fixing them.
 
-## README — orden exacta de ejecución
-**Qué se hizo:** README con instalación (`uv sync`), pruebas, ejecución,
-cuatro ejemplos, evaluación y uso opcional del modelo real. Redactado por
-Claude con mis decisiones.
-**Decisiones (mías):** los ejemplos enseñan la confirmación humana y los tres
-casos difíciles del enunciado. Mi primera propuesta (internet en MAD-02, ERP
-en VAL-01…) no encajaba con los datos: la lancé y vi que la vpn caída está en
-MAD-01 y el ERP caído en MAD-02 y BCN-01, así que la ajusté. El modelo real se
-explica, pero cada uno usa su propio token en su `.env`: el mío no se entrega.
-**Comprobación:** ejecutadas todas las órdenes del README tal cual; dan lo que
-dice cada comentario.
-**Rechazado:** mis primeros ejemplos (internet en MAD-02, ERP en VAL-01), porque no encajaban con los datos; incluir mi token o mi `.env`.
+## README — exact run instructions
+**What was done:** README with installation (`uv sync`), tests, running,
+four examples, evaluation and optional use of the real model. Drafted by
+Claude with my decisions.
+**Decisions (mine):** the examples show human confirmation and the three
+hard cases from the assignment. My first proposal (internet in MAD-02, ERP
+in VAL-01…) did not fit the data: I ran it and saw that the vpn down is in
+MAD-01 and the ERP down in MAD-02 and BCN-01, so I adjusted it. The real model is
+explained, but everyone uses their own token in their `.env`: mine is not handed in.
+**Check:** ran every command in the README as written; each gives what
+its comment says.
+**Rejected:** my first examples (internet in MAD-02, ERP in VAL-01), because they did not fit the data; including my token or my `.env`.
 
-## Informe (borrador)
-**Qué se hizo:** `informe.pdf` (3 páginas por ahora) generado con
-`informe/generar.py` (`uv run --no-project --with reportlab`, para no añadir
-dependencias al proyecto). Redactado por Claude a partir de mis decisiones de
-esta revisión; a mi nombre y con diseño propio, sin plantilla institucional.
-**Estructura:** problema y alcance; arquitectura (agentes, traspaso, estado y
-mensajes); herramientas y BM25; R1–R5 y permisos; pruebas y mi evaluación
-(con los hallazgos de la primera pasada); dos trazas reales; forma de trabajo
-y limitaciones. Sigue el reparto de puntos del enunciado.
-**Pendiente:** las dos trazas reales (`informe/traza1.txt` y `traza2.txt`)
-cuando haya créditos de HF; el script las inserta solo.
-**Rechazado:** usar la plantilla institucional: el informe va a mi nombre con diseño propio.
+## Report (draft)
+**What was done:** `report.pdf` (3 pages for now) generated with
+`report/generate.py` (`uv run --no-project --with reportlab`, so as not to add
+dependencies to the project). Drafted by Claude from my decisions in
+this review; under my name and with my own design, without the institutional template.
+**Structure:** problem and scope; architecture (agents, handoff, state and
+messages); tools and BM25; R1–R5 and permissions; tests and my evaluation
+(with the findings of the first pass); two real traces; way of working
+and limitations. It follows the point distribution of the assignment.
+**Pending:** the two real traces (`report/trace1.txt` and `trace2.txt`)
+when there are HF credits; the script inserts them by itself.
+**Rejected:** using the institutional template: the report is under my name with my own design.
 
-## Hito 6b — Modelo real en local (Ollama) y trazas del informe
-**Problema:** la cuenta de HF daba `402 Payment Required`. Siguiendo lo que
-dijo el profesor en clase (más cuentas u Ollama), creé una segunda cuenta con
-un token fine-grained de solo inferencia: también `402 … no remaining
-credits`. HF ya no da créditos gratuitos, así que más cuentas no sirven.
-**Decisión (mía):** Ollama en local, sin pagar. Comprobé antes que mi equipo
-puede (31 GB de RAM, RTX 3050 Ti, 388 GB libres) y que el profesor no lo
-necesita: pruebas, README y web usan el simulado; Ollama es opcional.
-**Orden lanzada:** `/hito6b`, redactada por Claude con mis decisiones.
-`ModeloOllama` reutiliza `ModeloHF` (mismo protocolo, `temperature=0`,
-reintentos) contra `localhost`, sin token; `--modelo ollama`. HF queda intacto.
-**Primera prueba real (qwen2.5:7b):** las dos trazas acabaron escaladas. El
-modelo devolvía JSON fuera de contrato (servicio inexistente, evidencias como
-texto) → R4 escaló tras 2 ilegibles; no consultaba herramientas; y se inventó
-citas (`docs/red.md#…`) → R5 las eliminó. Las reglas evitaron cualquier daño,
-pero el sistema no resolvía nada. Guardadas en `informe/traza*_antes.txt` y
-`informe/traza1_7b_prompt_mejorado.txt`.
-**Causa:** el prompt no decía el formato exacto, los valores permitidos, que
-hay que consultar antes de concluir, qué es cada servicio (el modelo eligió
-`wifi_invitados` para "no tengo internet") ni que conocimiento debe empezar
-por `buscar_docs`. Lo había previsto en el hito 4 (prompts "secos").
-**Solución (decidida por mí, opción a):** el prompt de cada agente incluye su
-formato exacto generado desde las mismas listas que valida el código; el
-diagnóstico recibe la descripción de los servicios (igual que el catálogo, lo
-comprueba una prueba) y conocimiento busca siempre primero. La validación en
-código no cambia: la seguridad sigue sin depender del prompt. Con el 7B
-mejoró el formato pero seguía sin usar herramientas; pasé a qwen2.5:14b.
-**Prueba ajustada (explicado):** `test_prompt_conocimiento_separa_proponibles`
-buscaba "reiniciar_servicio" en todo el prompt; ahora aparece legítimamente
-en el formato de `accion`. Se limita a la lista de herramientas llamables, que
-era lo que quería comprobar; la regla no cambia.
-**Resultado con qwen2.5:14b:** traza 1 ("no tengo internet", MAD-01): consulta
-la vpn, sube P2→P1, busca y cita kb-red-01, propone el reinicio, confirmo y
-resuelto (C-D-K): mi caso 1. Traza 2 (ERP, MAD-02): consulta el erp, el código
-detecta la avería en MAD-02 y BCN-01 y escala con P1 (C-D-E): mi caso 5.
-**Limitación vista:** el agente de escalado pone en "probado" cosas que nadie
-probó ("reiniciar navegador"). No es peligroso, pero es inexacto.
-**Comprobación:** `uv run pytest` → 289 en verde (sin Ollama ni red). Informe
-regenerado con las dos trazas (4 páginas). Al regenerarlo, `settings.json`
-bloqueó un `rm` de imágenes temporales: el permiso funciona.
-**Rechazado:** pagar créditos de HF; esperar a hablar con el profesor (riesgo con la entrega en dos días); quedarme con las trazas fallidas del 7B (opción b); obligar en código a consultar herramientas (opción b: más riesgo a dos días de la entrega).
+## Milestone 6b — Real model locally (Ollama) and report traces
+**Problem:** the HF account gave `402 Payment Required`. Following what the
+professor said in class (more accounts or Ollama), I created a second account with
+an inference-only fine-grained token: also `402 … no remaining
+credits`. HF no longer gives free credits, so more accounts do not help.
+**Decision (mine):** Ollama locally, without paying. I checked first that my machine
+can handle it (31 GB of RAM, RTX 3050 Ti, 388 GB free) and that the professor does not
+need it: tests, README and web use the simulated model; Ollama is optional.
+**Command launched:** `/ollama-model`, drafted by Claude with my decisions.
+`OllamaModel` reuses `HFModel` (same protocol, `temperature=0`,
+retries) against `localhost`, without a token; `--model ollama`. HF stays intact.
+**First real test (qwen2.5:7b):** both traces ended escalated. The
+model returned JSON outside the contract (nonexistent service, evidence as
+text) → R4 escalated after 2 unreadable; it did not call tools; and it made up
+citations (`docs/red.md#…`) → R5 removed them. The rules prevented any harm,
+but the system resolved nothing. Saved in `report/trace*_before.txt` and
+`report/trace1_7b_improved_prompt.txt`.
+**Cause:** the prompt did not state the exact format, the allowed values, that
+it must check before concluding, what each service is (the model chose
+`guest_wifi` for "I have no internet") nor that knowledge must start
+with `search_docs`. I had anticipated it in milestone 4 ("dry" prompts).
+**Solution (decided by me, option a):** each agent's prompt includes its
+exact format generated from the same lists the code validates; the
+diagnosis receives the service descriptions (the same as the catalog, checked
+by a test) and knowledge always searches first. The validation in
+code does not change: safety still does not depend on the prompt. With the 7B
+the format improved but it still did not use tools; I moved to qwen2.5:14b.
+**Adjusted test (explained):** `test_knowledge_prompt_separates_proposable`
+looked for "restart_service" in the whole prompt; now it legitimately appears
+in the format of `action`. It is limited to the list of callable tools, which
+was what it was meant to check; the rule does not change.
+**Result with qwen2.5:14b:** trace 1 ("I have no internet", MAD-01): checks
+the vpn, raises P2→P1, searches and cites kb-network-01, proposes the restart, I confirm and
+resolved (C-D-K): my case 1. Trace 2 (ERP, MAD-02): checks the erp, the code
+detects the outage in MAD-02 and BCN-01 and escalates with P1 (C-D-E): my case 5.
+**Limitation observed:** the escalation agent puts in "tried" things nobody
+tried ("restart browser"). It is not dangerous, but it is inaccurate.
+**Check:** `uv run pytest` → 289 green (without Ollama or network). Report
+regenerated with the two traces (4 pages). While regenerating it, `settings.json`
+blocked an `rm` of temporary images: the permission works.
+**Rejected:** paying for HF credits; waiting to talk to the professor (risky with the deadline in two days); keeping the failed 7B traces (option b); forcing tool calls in code (option b: more risk two days before the deadline).
 
-## Informe — revisión mía
-Al leerlo pedí dos cambios: una tabla con las prioridades P1–P4 (criterio,
-ejemplo de los datos y tiempo de primera respuesta) y una sección "Modelos de
-lenguaje" que aclare qué modelo se usa para qué (pruebas, simulado, Ollama
-para las trazas y HF opcional) y por qué no HF. Quedan 4 páginas.
-**Rechazado:** —
+## Report — my review
+After reading it I asked for two changes: a table with the P1–P4 priorities (criterion,
+example from the data and first response time) and a "Language
+models" section clarifying which model is used for what (tests, simulated, Ollama
+for the traces and optional HF) and why not HF. It stays at 4 pages.
+**Rejected:** —
 
-## Revisión 3 — Contraste con el enunciado completo
-**Qué hice:** comparé el proyecto con todas las láminas del enunciado.
-**Cumple:** R1–R5, entrega (CLAUDE.md < 200 líneas, README, informe de 4
-páginas, zip sin `.env` que arranca en limpio) y los mínimos del tema 2.
-**Faltaba y corregí:**
-1. R6 pide una traza del dominio y otra fuera de él: las dos eran del dominio.
-   Sustituí la del ERP (guardada en `informe/traza_erp_dominio.txt`) por
-   "¿me recomiendas un restaurante…?" con qwen2.5:14b: rechazado, fuera de
-   ámbito, sin prioridad (mi caso 7).
-2. Varias entradas de este worklog no decían qué se rechazó; añadidas.
-3. Órdenes sin `disable-model-invocation` ni `allowed-tools`, y sin decir qué
-   reviso yo (ver más abajo).
-4. Permisos sin deny sobre `CLAUDE.md` y `.claude/` (ver más abajo).
-**Diferencias que mantengo y por qué:**
-- El hito 0 lo hice a mano (`uv init --package`, permisos y CLAUDE.md), sin
-  una orden `/setup`; no la invento a posteriori.
-- El proyecto está empaquetado (`uv init --package`), aunque la lámina habla
-  de un proyecto sin empaquetar: lo necesita la orden `soporte-oficinas` del
-  README y cambiarlo a dos días de la entrega pone en riesgo el arranque.
-- La acción irreversible es simulada en memoria (no toca ningún sistema real)
-  en vez de escribir en un fichero: así cada ejecución y cada prueba parte del
-  mismo estado.
-**Órdenes:** añadidas a las 9 la cabecera `disable-model-invocation: true`
-(solo se lanzan cuando yo las pido) y `allowed-tools` (solo lo que necesita
-cada hito: leer y editar código y `uv run pytest`; en los hitos 7 y 7b,
-además, la tabla de evaluación), y una sección "Qué reviso yo" con lo que
-compruebo en cada hito. Redactado por Claude a partir de esta revisión.
+## Review 3 — Comparison with the full assignment
+**What I did:** I compared the project with all the slides of the assignment.
+**Meets:** R1–R5, submission (CLAUDE.md < 200 lines, README, 4-page
+report, zip without `.env` that starts clean) and the minimums of topic 2.
+**Missing and corrected:**
+1. R6 asks for one trace within the domain and one outside it: both were within the domain.
+   I replaced the ERP one (saved in `report/trace_erp_domain.txt`) with
+   "can you recommend a restaurant…?" with qwen2.5:14b: rejected, out of
+   scope, without priority (my case 7).
+2. Several entries in this worklog did not say what was rejected; added.
+3. Commands without `disable-model-invocation` or `allowed-tools`, and without saying what
+   I review (see below).
+4. Permissions without deny on `CLAUDE.md` and `.claude/` (see below).
+**Differences I keep and why:**
+- I did milestone 0 by hand (`uv init --package`, permissions and CLAUDE.md), without
+  a `/setup` command; I do not invent one after the fact.
+- The project is packaged (`uv init --package`), although the slide talks about
+  an unpackaged project: the `office-support` command in the
+  README needs it, and changing it two days before the deadline puts the startup at risk.
+- The irreversible action is simulated in memory (it touches no real system)
+  instead of writing to a file: this way every run and every test starts from the
+  same state.
+**Commands:** added to all 9 the header `disable-model-invocation: true`
+(they are only launched when I ask for them) and `allowed-tools` (only what
+each milestone needs: reading and editing code and `uv run pytest`; in milestones 7 and 7b,
+also the evaluation table), and a "What I review" section with what
+I check in each milestone. Drafted by Claude from this review.
 
-## Hito 8 — Web Streamlit
-**Orden lanzada:** `/hito8`, redactada por Claude con mis decisiones.
-**Qué se hizo:** `app.py` (solo muestra) y `web.py` (lógica sin Streamlit,
-probada); Streamlit en el grupo opcional `web`, para que `uv sync` y
-`uv run pytest` no lo necesiten; temas claro y oscuro en `.streamlit/config.toml`.
-**Decisiones (mías):** texto libre + desplegable de oficina + ticket opcional
-(en una empresa real la oficina saldría del inicio de sesión); botones con mis
-casos de ejemplo; confirmar con botón; modelo simulado por defecto, porque es
-más rápido; un modelo real de Ollama solo si funciona en el equipo, para
-enseñarlo en local en la defensa.
-**Fallos que encontré yo al probarla a mano:**
-1. "Atender incidencia" rompía la página (`StreamlitWidgetAlreadyInstantiatedError`):
-   reescribía los campos del formulario ya dibujados. Prueba que lo reproduce
-   (`test_formulario_escrito_a_mano`) y arreglo con un callback.
-2. "No sé cómo apagar la impresora" daba como procedimiento la sección
-   «Causa» del artículo del atasco. El simulado usaba cualquier sección si no
-   había «Pasos»; ahora solo «Pasos» es procedimiento y, si no hay, se escala.
-**Fallos que salieron al probar el modelo real en la web:**
-3. Confirmar repitiendo la ejecución con la respuesta no sirve con un modelo
-   real: la segunda vez acabó en escalado en lugar de resuelto. Ahora es una
-   sola ejecución en segundo plano que espera al botón, como el [s/N].
-4. Si la ejecución terminaba sin preguntar y se respondía igualmente, se
-   quedaba colgada. `responder` no hace nada si no hay pregunta (con prueba).
-**Diseño (pedido por mí):** sin emoticonos ni degradado, modo claro y oscuro
-seleccionable, un único color de acento (más oscuro en modo oscuro) y una
-explicación de cada final y prioridad, con los mismos textos que
-`guia-prioridades.md` y los mismos tiempos que el orquestador (lo comprueba una prueba).
-**Comprobación:** `uv run pytest` → 315 en verde; las pruebas de la página
-(`test_app.py`, con `streamlit.testing`) se omiten sin el grupo `web` y pasan con
-`uv run --group web pytest`. Modelo real en la web: una ejecución de 98 s
-con qwen2.5:14b → pregunta → confirmo → resuelto P1.
-**Rechazado:** una página HTML en claude.ai (no ejecuta mi código); repetir la
-ejecución para confirmar (no determinista con un modelo real); el primer
-diseño con emoticonos y degradado; el modelo real en una web pública.
+## Milestone 8 — Streamlit web
+**Command launched:** `/streamlit-web`, drafted by Claude with my decisions.
+**What was done:** `app.py` (display only) and `web.py` (logic without Streamlit,
+tested); Streamlit in the optional `web` group, so that `uv sync` and
+`uv run pytest` do not need it; light and dark themes in `.streamlit/config.toml`.
+**Decisions (mine):** free text + office dropdown + optional ticket
+(in a real company the office would come from the login); buttons with my
+example cases; confirm with a button; simulated model by default, because it is
+faster; a real Ollama model only if it works on the machine, to
+show it locally at the defence.
+**Bugs I found when testing it by hand:**
+1. "Handle incident" broke the page (`StreamlitWidgetAlreadyInstantiatedError`):
+   it rewrote form fields that were already drawn. A test that reproduces it
+   (`test_form_typed_by_hand`) and a fix with a callback.
+2. "I don't know how to turn off the printer" gave as procedure the
+   «Cause» section of the paper-jam article. The simulated model used any section if there
+   was no «Steps»; now only «Steps» is a procedure and, if there is none, it is escalated.
+**Bugs that came up when testing the real model on the web:**
+3. Confirming by repeating the run with the answer does not work with a real
+   model: the second time it ended escalated instead of resolved. Now it is a
+   single background run that waits for the button, like the [y/N].
+4. If the run finished without asking and an answer was given anyway, it
+   hung. `respond` does nothing if there is no question (with a test).
+**Design (requested by me):** no emojis or gradient, selectable light and dark
+mode, a single accent colour (darker in dark mode) and an
+explanation of each final and priority, with the same texts as
+`priority-guide.md` and the same times as the orchestrator (checked by a test).
+**Check:** `uv run pytest` → 315 green; the page tests
+(`test_app.py`, with `streamlit.testing`) are skipped without the `web` group and pass with
+`uv run --group web pytest`. Real model on the web: a 98 s run
+with qwen2.5:14b → asks → I confirm → resolved P1.
+**Rejected:** an HTML page on claude.ai (it does not run my code); repeating the
+run to confirm (non-deterministic with a real model); the first
+design with emojis and gradient; the real model on a public web.
 
-## Permisos finales — candado sobre la especificación
-**Qué hice:** escribí a mano en `.claude/settings.json` el deny de edición y
-escritura sobre `CLAUDE.md`, `.claude/` (permisos y órdenes), `docs/` y
-`data/`, como pide el H0 del enunciado: Claude Code no puede tocar mi
-especificación ni los documentos y datos originales. Lo puse al final porque
-hasta ahora Claude redactaba esos ficheros con mis decisiones.
-**Comprobación:** Claude intentó editar `CLAUDE.md`, crear una orden en
-`.claude/commands/` y un fichero en `docs/`: los tres bloqueados ("denied by
-your permission settings"). Tampoco puede quitarse el candado: `settings.json`
-está dentro de `.claude/`. Si hace falta cambiar algo, lo edito yo.
-**Rechazado:** —
+## Final permissions — lock on the specification
+**What I did:** I wrote by hand in `.claude/settings.json` the edit and
+write deny on `CLAUDE.md`, `.claude/` (permissions and commands), `docs/` and
+`data/`, as H0 of the assignment requires: Claude Code cannot touch my
+specification or the original documents and data. I added it at the end because
+until then Claude drafted those files with my decisions.
+**Check:** Claude tried to edit `CLAUDE.md`, create a command in
+`.claude/commands/` and a file in `docs/`: all three blocked ("denied by
+your permission settings"). It cannot remove the lock either: `settings.json`
+is inside `.claude/`. If something needs to change, I edit it myself.
+**Rejected:** —
 
-## Comprobación final en limpio (hecha por mí)
-**Qué hice:** como lo hará el profesor: descomprimí el zip de la entrega con el
-Explorador de Windows en una carpeta nueva del Escritorio (sin `.env` ni
-`.venv`), abrí una terminal allí y seguí el README: `uv sync`, `uv run pytest`
-y `uv run soporte-oficinas "no tengo internet" --oficina MAD-01 --traza`,
-respondiendo "s"; también arranqué la web con
+## Final clean check (done by me)
+**What I did:** as the professor will: I unzipped the submission zip with
+Windows Explorer into a new folder on the Desktop (without `.env` or
+`.venv`), opened a terminal there and followed the README: `uv sync`, `uv run pytest`
+and `uv run office-support "I have no internet" --office MAD-01 --trace`,
+answering "y"; I also started the web with
 `uv run --group web streamlit run app.py`.
-**Resultado:** todo funcionó: las pruebas en verde (las de la página web se
-omiten sin el grupo `web`, como está previsto), la orden del README acabó en
-resuelto con P1 y su traza, y la web abrió y respondió.
-**Rechazado:** —
+**Result:** everything worked: tests green (the web page tests are
+skipped without the `web` group, as intended), the README command ended
+resolved with P1 and its trace, and the web opened and responded.
+**Rejected:** —
+
+## Translation to English (2026-10-19)
+**Why:** the professor asked for the whole project in English. Decided by me;
+drafted and implemented by Claude Code from a glossary we agreed on
+(one name per concept, used in code, data, docs, tests and prose).
+**What was done:** everything translated as if it had been written in English:
+package `soporte_oficinas` → `office_support`, command `office-support`,
+modules (`state`, `model`, `tools`, `retrieval`, `agents`, `orchestrator`,
+`evaluation`…), JSON contracts, data (`services.json`, `inventory.json`),
+docs (`kb-network-01.md#Steps`…), tests, CLAUDE.md, commands
+renamed after what they do (`/data-and-docs`, `/orchestrator`, `/streamlit-web`…), README, this worklog, the web and `report/`. Renames done with
+`git mv`; as almost every line changed, git shows most of them as a deleted
+file plus a new one. The Spanish history is kept in the `spanish-version` branch. The GitHub repository keeps
+its name (`soporte-oficinas`) so the link already shared still works.
+To let Claude edit them, I removed the deny on `CLAUDE.md`, `.claude/`,
+`docs/` and `data/` for the translation and put it back afterwards.
+**Problems and solutions:**
+1. BM25 was tuned for Spanish. New English stop words and a light stemmer
+   (-ing, -ed, plural, final e; 6 letters), with the stem tests rewritten
+   ("restart/restarts/restarting/restarted"). The 11 quality queries rank the
+   expected document first.
+2. The restart-policy margin fell to ×1.15 (< 1.2) because the English catalog
+   repeated "business hours". The catalog note was reworded; the test was not
+   changed. Margins now ×1.24 and ×1.43 over `kb-printer-02.md`.
+3. Simulated model keywords rewritten in English; the tokenizer drops
+   apostrophes ("can't" → "cant") so "Can you recommend a restaurant?" stays
+   `out_of_scope`.
+4. Real traces re-run in English with qwen2.5:14b (not translated by hand).
+   Trace 2 and the ERP trace behave as in Spanish. Trace 1 does not: the
+   knowledge agent skipped `search_docs` and cited a document it never
+   retrieved; R5 removed the citation and the run was escalated with P1
+   instead of resolved. The code rules held; the prompt rule "first turn is
+   ALWAYS search_docs" is not enough in English. The report says so. The
+   older traces (`*_before.txt`, 7b) are archived Spanish runs, translated and
+   labelled as such.
+**Check:** `uv run pytest` → 314 green (one confirmation case fewer: Spanish
+had "si" and "sí", English only "y"/"yes"); `uv run --group web pytest
+tests/test_app.py` → 6 green; the README commands run with the simulated model.
+**Rejected:** rewriting the git history in English (it needs a force push;
+old commits stay in Spanish); translating the real traces by hand (they would
+no longer be real); the React web and live trace, postponed after the deadline.
+
+## Milestone 9 — React web console
+**Why:** the professor suggested a more professional web where the agents can
+be seen working. Decided by me after the translation; command
+`/react-console` and code drafted by Claude Code with my decisions.
+**What was done:** `orchestrate(..., on_step=)` streams each step as it enters
+the trace (`Trace(list)` in `state.py`); `web.py` adds the live steps, a JSON
+snapshot of the run and what each step is (tool call, answer, orchestrator
+note…) and which rule it shows; `server.py` (standard library, 127.0.0.1 only)
+serves the page and a small JSON API; `static/` holds the React console:
+pipeline of the four agents with their tools and findings, R1–R5 badges that
+light up when a rule acts, live trace, step counter against the limit, R1
+confirmation modal, result with priority, escalation and citations, network
+status, light and dark themes and `?example=N` links.
+**Decisions:** React 18 + htm from a pinned CDN (no Node, no build, no new
+Python dependency); polling instead of WebSockets; the page replays the steps
+at a readable pace because the simulated model answers instantly. Streamlit
+stays as an optional alternative.
+**Check:** 14 new tests (live steps, R1 in the stream, JSON views, note rules,
+the server over real HTTP: confirm → resolved, reject → escalated, path
+traversal blocked, 400/404) → `uv run pytest` 328 green (341 after the
+safety rule below). Screenshots with headless
+Chrome of the empty page, the confirmation modal, the multi-office escalation
+and a resolved case, in dark and light themes.
+**Found:** with the simulated model, "I have no internet" in VAL-01 is resolved
+citing `kb-network-01.md#Steps` (VPN) instead of `kb-network-02.md` (network
+card). The Spanish version did the same (`kb-red-01`): it is a limit of the
+keyword-based simulated model, not of the translation; my evaluation case 3
+(scripted) cites `kb-network-02` and passes.
+**Found by me in the console:** "The printed had exploded" was resolved with the
+paper-jam steps: the simulated model only looked at the word "print". Physical
+repairs are not first level, so now, if the incident describes physical damage
+(explosion, fire, smoke, sparks…), the simulated diagnosis says so, knowledge
+gives no procedure and the orchestrator escalates (test with 3 incidents).
+The Spanish version had the same fault. Then I decided a new rule, guaranteed in
+code: a safety hazard (explosion, fire, smoke, sparks, burning) raises the
+priority to at least P2 and goes straight to escalation after the diagnosis,
+whatever the model says. Added to CLAUDE.md, `priority-guide.md` and
+`escalation-procedure.md`; 9 tests (words that are and are not a hazard, e.g.
+"firewall" is not; P4 → P2 with escalation; P1 is never lowered).
+**Rejected:** Node + Vite build (another toolchain to install for whoever
+corrects it); WebSockets (polling is enough and simpler to test); removing the
+Streamlit web.
+
+## Final review of README, report and docs
+**What was done:** README updated (React console, safety-hazard example,
+English incidents, Ollama 14b for the report traces, commands by name, number
+of tests); `report.pdf` regenerated (341 tests, safety hazard in priorities and
+handoff, milestones 0 to 9, web console in "Reproduce"; still 4 pages); a
+"Safety hazard" example case in the web. Drafted by Claude Code at my request.
+**Check:** `uv run pytest` → 341 green; `uv run --group web pytest
+tests/test_app.py` green; the README commands run.
+**Rejected:** —

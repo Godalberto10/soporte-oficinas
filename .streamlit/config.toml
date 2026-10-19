@@ -1,5 +1,5 @@
-# Dos temas (claro y oscuro): el selector de Streamlit (menú ⋮ → Settings) sigue
-# funcionando. Un único color de acento, el del informe.
+# Two themes (light and dark): Streamlit's selector (menu ⋮ → Settings) still
+# works. A single accent color, the one used in the report.
 
 [theme.light]
 primaryColor = "#0F5E59"

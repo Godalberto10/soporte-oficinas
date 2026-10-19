@@ -1,0 +1,16 @@
+[
+  {"id": "PC-MAD01-001", "type": "desktop", "office": "MAD-01", "model": "Dell OptiPlex 7090", "status": "operational"},
+  {"id": "PC-MAD01-002", "type": "laptop", "office": "MAD-01", "model": "Lenovo ThinkPad T14", "status": "operational"},
+  {"id": "IMP-MAD01-001", "type": "printer", "office": "MAD-01", "model": "HP LaserJet M428", "status": "operational"},
+  {"id": "PC-MAD02-001", "type": "desktop", "office": "MAD-02", "model": "Dell OptiPlex 7090", "status": "operational"},
+  {"id": "IMP-MAD02-001", "type": "printer", "office": "MAD-02", "model": "Brother HL-L6400", "status": "paper_jam"},
+  {"id": "IMP-MAD02-002", "type": "printer", "office": "MAD-02", "model": "HP LaserJet M428", "status": "operational"},
+  {"id": "PC-BCN01-001", "type": "desktop", "office": "BCN-01", "model": "HP EliteDesk 800 G6", "status": "operational"},
+  {"id": "PC-BCN01-002", "type": "laptop", "office": "BCN-01", "model": "Lenovo ThinkPad T14", "status": "operational"},
+  {"id": "IMP-BCN01-001", "type": "printer", "office": "BCN-01", "model": "Kyocera ECOSYS M3655", "status": "out_of_toner"},
+  {"id": "PC-VAL01-001", "type": "desktop", "office": "VAL-01", "model": "HP EliteDesk 800 G6", "status": "operational"},
+  {"id": "PC-VAL01-002", "type": "desktop", "office": "VAL-01", "model": "Dell OptiPlex 7090", "status": "faulty_network_card"},
+  {"id": "PC-VAL01-003", "type": "laptop", "office": "VAL-01", "model": "Lenovo ThinkPad T14", "status": "no_power"},
+  {"id": "IMP-VAL01-001", "type": "printer", "office": "VAL-01", "model": "HP LaserJet M428", "status": "operational"},
+  {"id": "MON-VAL01-001", "type": "monitor", "office": "VAL-01", "model": "Dell P2422H", "status": "operational"}
+]

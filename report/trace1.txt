@@ -1,0 +1,18 @@
+Final: escalated
+Type: network · Priority: P1
+Escalation: ESC-0001
+
+Answer to the employee:
+Your incident has been escalated to second level with the ID ESC-0001 (priority P1). First response time: 15 minutes.
+
+Trace:
+   1. [classifier] response -> {"type": "network", "priority": "P2", "reason": "An employee cannot access the internet, which is necessary for their work, but it's not clear if it's a critica…
+   2. [diagnosis] response -> {"tool": "check_service", "arguments": {"service": "vpn", "office": "MAD-01"}}
+   3. [diagnosis] check_service({"service": "vpn", "office": "MAD-01"}) -> {"service": "vpn", "office": "MAD-01", "status": "down"}
+   4. [diagnosis] response -> {"cause": "The Office VPN tunnel to the data center is down.", "service": "vpn", "evidence": ["The Office VPN tunnel to the data center is down.", "check_servic…
+   5. [orchestrator] note -> priority raised from P2 to P1: service vpn affected in MAD-01
+   6. [knowledge] response -> {"procedure": "Restart the Office VPN tunnel to the data center.", "citations": ["docs/network_services.md#vpn-tunnel-restart"], "action": {"tool": "restart_ser…
+   7. [orchestrator] note -> citations removed because they were not retrieved: docs/network_services.md#vpn-tunnel-restart
+   8. [orchestrator] note -> no procedure with valid citations: escalating
+   9. [escalation] response -> {"summary": "The Office VPN tunnel to the data center is down, causing a loss of internet connectivity in MAD-01.", "tried": ["Restart the Office VPN tunnel to …
+  10. [escalation] create_escalation({"ticket": "T-0001", "summary": "The Office VPN tunnel to the data center is down, causing a loss of internet connectivity in MAD-01.", "priority": "P1"}) -> {"escalation": "ESC-0001", "ticket": "T-0001", "priority": "P1"}

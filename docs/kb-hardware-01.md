@@ -1,17 +1,17 @@
-# El portátil no enciende
+# The laptop won't turn on
 
-## Síntomas
-- Al pulsar el botón de encendido no se ilumina ningún indicador.
-- El cargador está conectado pero el piloto de carga no se enciende.
+## Symptoms
+- Pressing the power button does not light up any indicator.
+- The charger is plugged in but the charging light does not come on.
 
-## Causa
-Batería agotada por completo, cargador defectuoso o avería de la placa.
-En el inventario puede figurar con estado `no_enciende`.
+## Cause
+Fully drained battery, faulty charger or motherboard failure.
+The inventory may list the device with status `no_power`.
 
-## Pasos
-1. Consultar la ficha del equipo con `consultar_equipo`.
-2. Pedir al empleado que pruebe otro cargador y otra toma de corriente.
-3. Mantener pulsado el botón de encendido 30 segundos sin cargador y
-   volver a intentarlo con el cargador conectado.
-4. Si no enciende, ofrecer un equipo de préstamo y escalar a segundo nivel
-   para reparación.
+## Steps
+1. Check the device record with `check_device`.
+2. Ask the employee to try another charger and another power outlet.
+3. Hold the power button down for 30 seconds without the charger, then
+   try again with the charger connected.
+4. If it still won't turn on, offer a loan laptop and escalate to second level
+   for repair.

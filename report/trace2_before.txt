@@ -1,0 +1,17 @@
+# Archived output of the Spanish version of the system (before the translation to English), translated for readability.
+Final: escalated
+Type: app_access · Priority: P3
+Escalation: ESC-0001
+
+Answer to the employee:
+Your incident has been escalated to second level with the ID ESC-0001 (priority P3). First response time: 2 hours.
+
+Trace:
+   1. [classifier] response -> invalid response ('type' must be one of ['app_access', 'email', 'hardware', 'network', 'other', 'out_of_scope', 'printer']): {"type": "erp", "priori…
+   2. [classifier] response -> {"type": "app_access", "priority": "P3", "reason": "The employee in the MAD-02 office cannot access the ERP and there is no known alternative."}
+   3. [diagnosis] response -> invalid response ('service' must be one of ['email', 'erp', 'files', 'guest_wifi', 'intranet', 'printing', 'vpn']): {"cause": "authentication_rejec…
+   4. [diagnosis] response -> invalid response ('evidence' must be a list of strings): {"cause": "authentication_rejected", "service": "erp", "evidence": "ERP access incident…
+   5. [orchestrator] note -> 2 unreadable responses in a row from diagnosis: escalating
+   6. [escalation] response -> invalid response ('tried' must be a list of strings): {"summary": "ERP access incident in MAD-02", "tried": {"type": "app_access"}, "pr…
+   7. [escalation] response -> {"summary": "ERP access incident in MAD-02", "tried": ["Diagnosis: escalating"], "priority": "P3", "escalation": "ESC-0001"}
+   8. [escalation] create_escalation({"ticket": null, "summary": "ERP access incident in MAD-02", "priority": "P3"}) -> {"escalation": "ESC-0001", "ticket": null, "priority": "P3"}
