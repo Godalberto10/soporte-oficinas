@@ -121,15 +121,22 @@ Each incident makes about 5–10 model calls and spends the account's credits.
 
 ## Structure
 ```
-src/office_support/     state, model, tools, retrieval (BM25),
-                        agents, orchestrator, evaluation, cli, web,
-                        server (web console) and static/ (React page)
+src/office_support/
+  domain/               state (State, Step, Action, Result) and policy (services,
+                        priorities, response times, business hours)
+  agents/               contracts (JSON + validation), definitions, prompts,
+                        runner (common loop) and specialists (the four agents)
+  orchestration/        orchestrator (handoff flow) and rules (priority,
+                        handoff, R2 guardrail, R5 citations)
+  interfaces/           cli, web (logic without a UI), server (web console)
+                        and static/ (React page)
+  model.py, tools.py, retrieval.py (BM25), evaluation.py
 app.py                  Streamlit web (optional alternative)
 data/                   simulated state: services, inventory, tickets
 docs/                   knowledge base (kb-* articles and policies)
 tests/                  pytest tests
 report/, report.pdf     report and its generator (report/generate.py)
 CLAUDE.md, .claude/     specification, permissions and one command per milestone
-                        (/data-and-docs … /react-console)
+                        (/data-and-docs … /modularization)
 worklog.md              decision log
 ```

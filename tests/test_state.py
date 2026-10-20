@@ -2,7 +2,7 @@
 
 from dataclasses import fields, is_dataclass
 
-from office_support.state import Action, Result, State, Step
+from office_support.domain import Action, Result, State, Step
 
 
 def _fields(cls) -> list[str]:

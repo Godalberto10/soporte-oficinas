@@ -639,3 +639,31 @@ handoff, milestones 0 to 9, web console in "Reproduce"; still 4 pages); a
 **Check:** `uv run pytest` → 341 green; `uv run --group web pytest
 tests/test_app.py` green; the README commands run.
 **Rejected:** —
+
+## Modularization of src/ into subpackages (milestone 10)
+**Command launched:** none beforehand: I asked for it in the chat; the command
+`.claude/commands/modularization.md` was drafted afterwards by Claude Code to
+record the milestone with the same format as the others.
+**What was done:** at the teacher's request, the flat package was organized into
+subpackages by responsibility, without changing behaviour: `domain/` (`state.py`
+and a new `policy.py` with the constants that were spread across agents,
+orchestrator, tools and web: types, services, critical services, priorities,
+response times, offices, business hours), `agents/` (the old `agents.py` split
+into `contracts`, `definitions`, `prompts`, `runner` and `specialists`),
+`orchestration/` (`rules.py` with input validation, priority, handoff rules,
+R2 and R5; `orchestrator.py` with the flow, R1, R3 and R4) and `interfaces/`
+(`cli`, `web`, `server`, `static/`). `model.py`, `tools.py`, `retrieval.py` and
+`evaluation.py` stay as modules: they are small and have one responsibility.
+The `__init__.py` files re-export the public names (`agents.classifier(...)`
+still works); the entry points in `pyproject.toml` point to
+`office_support.interfaces.*`; tests only changed their imports. I decided to do
+it and the layout; drafted and implemented by Claude Code at my request.
+**Check:** `uv run pytest` → 341 green, 1 skipped (same as before the change);
+`uv run --group web pytest tests/test_app.py` → 6 green; `office-support` and
+`office-support-web` start.
+**Rejected:** one folder per module (`models/`, `tools/` with a single file:
+bureaucracy for ~2,000 lines); compatibility shims at the old paths (two ways
+of importing the same thing).
+**CLAUDE.md:** I removed the deny lines on CLAUDE.md, .claude/, docs/ and data/
+for this block; Claude Code rewrote the "Structure" section (194 lines, under
+200) and drafted the command; then I put the deny lines back.

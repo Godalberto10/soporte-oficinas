@@ -3,8 +3,8 @@
 import pytest
 
 from office_support.model import OllamaModel, ScriptedModel, SimulatedModel
-from office_support.state import Action
-from office_support.web import (EXAMPLES, OFFICES, Execution, create_model, describe_action,
+from office_support.domain import Action
+from office_support.interfaces.web import (EXAMPLES, OFFICES, Execution, create_model, describe_action,
                                 ollama_models, outages, stages, trace_rows)
 
 INTERNET = ("I have no internet", "MAD-01", "T-0001")
@@ -115,7 +115,7 @@ def test_stages_marks_the_agents_that_acted():
 def test_explanations_match_the_guide_and_the_catalog():
     from pathlib import Path
 
-    from office_support import web
+    from office_support.interfaces import web
     guide = (Path(__file__).resolve().parents[1] / "docs" / "priority-guide.md"
              ).read_text(encoding="utf-8").replace("`", "")
     for priority, criterion in web.PRIORITY_CRITERIA.items():
@@ -152,13 +152,13 @@ def test_snapshot_streams_steps_with_kinds_and_rules():
     ("something else", None),
 ])
 def test_note_rule(text, rule):
-    from office_support.web import note_rule
+    from office_support.interfaces.web import note_rule
     assert note_rule(text) == rule
 
 
 def test_meta_describes_agents_from_their_definition():
     from office_support.agents import AGENTS
-    from office_support.web import meta
+    from office_support.interfaces.web import meta
     data = meta()
     for agent in data["agents"]:
         assert agent["tools"] == list(AGENTS[agent["name"]].tools)

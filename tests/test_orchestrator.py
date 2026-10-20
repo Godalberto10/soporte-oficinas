@@ -6,14 +6,10 @@ from datetime import datetime
 import pytest
 
 from office_support.model import ScriptedModel
-from office_support.orchestrator import (
-    guardrail,
-    in_business_hours,
-    minimum_priority,
-    orchestrate,
-    trajectory,
-)
-from office_support.state import Action, State, Step
+from office_support.domain.policy import in_business_hours
+from office_support.orchestration import orchestrate, trajectory
+from office_support.orchestration.rules import guardrail, minimum_priority
+from office_support.domain import Action, State, Step
 from office_support.tools import Network
 
 MONDAY_10 = datetime(2026, 10, 12, 10, 0)
@@ -419,14 +415,14 @@ def test_on_step_sees_the_question_before_the_restart(network):
                                       "there is smoke coming out of the monitor",
                                       "sparks from the socket under my desk"])
 def test_safety_hazard(incident):
-    from office_support.orchestrator import safety_hazard
+    from office_support.orchestration.rules import safety_hazard
     assert safety_hazard(incident)
 
 
 @pytest.mark.parametrize("incident", ["the firewall blocks the ERP", "I have no internet",
                                       "the printer is not printing"])
 def test_no_safety_hazard(incident):
-    from office_support.orchestrator import safety_hazard
+    from office_support.orchestration.rules import safety_hazard
     assert not safety_hazard(incident)
 
 

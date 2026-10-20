@@ -5,9 +5,9 @@ from pathlib import Path
 
 import pytest
 
-from office_support import cli
+from office_support.interfaces import cli
 from office_support import model as model_module
-from office_support.state import Action
+from office_support.domain import Action
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -91,7 +91,7 @@ def test_cli_hf_without_token(capsys):
 
 def test_pyproject_points_to_cli():
     data = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
-    assert data["project"]["scripts"]["office-support"] == "office_support.cli:main"
+    assert data["project"]["scripts"]["office-support"] == "office_support.interfaces.cli:main"
 
 
 def test_help(capsys):

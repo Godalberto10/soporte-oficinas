@@ -8,7 +8,7 @@ import urllib.request
 
 import pytest
 
-from office_support import server, web
+from office_support.interfaces import server, web
 
 
 @pytest.fixture(scope="module")

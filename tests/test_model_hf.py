@@ -6,11 +6,11 @@ from types import SimpleNamespace
 
 import pytest
 
-from office_support import cli
+from office_support.interfaces import cli
 from office_support import model as model_module
 from office_support.model import (DEFAULT_MODEL, OLLAMA_DEFAULT_MODEL, HFModel,
                                   OllamaModel, SimulatedModel)
-from office_support.orchestrator import orchestrate, trajectory
+from office_support.orchestration import orchestrate, trajectory
 from office_support.tools import Network
 
 MONDAY_10 = datetime(2026, 10, 12, 10, 0)

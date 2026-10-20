@@ -1,14 +1,14 @@
 """Office support web: thin layer over orchestrate() (milestone 8).
 
 Start: uv run --group web streamlit run app.py
-Nothing is decided here: everything is done by office_support.web / orchestrate().
+Nothing is decided here: everything is done by office_support.interfaces.web / orchestrate().
 No custom CSS: colors come from the theme (light or dark, .streamlit/config.toml).
 """
 
 import streamlit as st
 
-from office_support import web
-from office_support.state import Action
+from office_support.domain.state import Action
+from office_support.interfaces import web
 
 FINALS = {
     "resolved": ("green", "Resolved at first level"),

@@ -25,17 +25,18 @@ employee what happens next (escalation, its id and the response time).
 ## Structure
 ```
 src/office_support/
-  state.py         State, Step, Action, Result (dataclasses)
+  domain/          state.py (State, Step, Action, Result) · policy.py (types, services,
+                   priorities, response times, offices, business hours)
+  agents/          contracts (JSON + validation), definitions (the 4 agents),
+                   prompts, runner (common loop), specialists (apply output to State)
+  orchestration/   orchestrator.py (orchestrate(): handoff flow, R1, R3, R4) ·
+                   rules.py (input, priority, handoff rules, R2 guardrail, R5 citations)
+  interfaces/      cli.py (office-support) · web.py (web logic without a UI) ·
+                   server.py (office-support-web: stdlib HTTP + JSON API) · static/ (React)
   model.py         Model protocol, ScriptedModel, SimulatedModel, HFModel, OllamaModel
   tools.py         tools + registry with description and reversible
   retrieval.py     own BM25 index over docs/
-  agents.py        classifier, diagnosis, knowledge, escalation
-  orchestrator.py  orchestrate(): handoff, step limit, guardrails
-  cli.py           main() of the office-support command
   evaluation.py    my evaluation cases and the report table
-  web.py           web logic without a UI (background run, JSON views, explanations)
-  server.py        office-support-web: stdlib HTTP server + JSON API over web.py
-  static/          React console (index.html, app.js, styles.css)
 app.py             Streamlit web (thin layer) · .streamlit/config.toml: themes
 data/   services.json, inventory.json, tickets.json
 docs/   knowledge base in Markdown (see "Documents")

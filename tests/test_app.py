@@ -17,7 +17,7 @@ APP = str(Path(__file__).resolve().parents[1] / "app.py")
 @pytest.fixture(autouse=True)
 def without_ollama(monkeypatch):
     """The tests do not depend on Ollama running on the computer."""
-    from office_support import web
+    from office_support.interfaces import web
     monkeypatch.setattr(web, "ollama_models", lambda *a, **k: [])
 
 
@@ -69,7 +69,7 @@ def test_form_typed_by_hand():
 
 
 def test_selector_shows_the_real_model_if_ollama_is_running(monkeypatch):
-    from office_support import web
+    from office_support.interfaces import web
     monkeypatch.setattr(web, "ollama_models", lambda *a, **k: ["qwen2.5:14b"])
     app = _app()
     assert app.radio(key="model").options == ["Simulated", "Real · qwen2.5:14b"]

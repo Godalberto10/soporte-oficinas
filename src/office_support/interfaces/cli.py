@@ -5,9 +5,9 @@ import json
 import sys
 from collections.abc import Callable
 
+from office_support.domain.state import Action, Result, Step
 from office_support.model import HFModel, Model, OllamaModel, SimulatedModel
-from office_support.orchestrator import orchestrate
-from office_support.state import Action, Result, Step
+from office_support.orchestration import orchestrate
 
 YES_ANSWERS = {"y", "yes"}
 OBSERVATION_LENGTH = 160

@@ -5,17 +5,11 @@ from pathlib import Path
 
 import pytest
 
-from office_support.agents import (
-    AGENTS,
-    SERVICES,
-    TYPES,
-    extract_json,
-    run_agent,
-    system_prompt,
-)
 from office_support import agents
+from office_support.agents import AGENTS, extract_json, run_agent, system_prompt
+from office_support.domain import Action, State
+from office_support.domain.policy import SERVICE_DESCRIPTIONS, SERVICES, TYPES
 from office_support.model import ScriptedModel
-from office_support.state import Action, State
 from office_support.tools import Network, create_tools
 
 
@@ -332,8 +326,8 @@ def test_classifier_prompt_allowed_types(t):
 def test_service_descriptions_match_the_catalog():
     catalog = (Path(__file__).resolve().parents[1] / "docs" / "service-catalog.md"
                ).read_text(encoding="utf-8")
-    assert set(agents.SERVICE_DESCRIPTIONS) == SERVICES
-    for service, description in agents.SERVICE_DESCRIPTIONS.items():
+    assert set(SERVICE_DESCRIPTIONS) == SERVICES
+    for service, description in SERVICE_DESCRIPTIONS.items():
         assert f"| `{service}` | {description} |" in catalog
 
 

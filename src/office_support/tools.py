@@ -8,10 +8,10 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
+from office_support.domain.policy import PRIORITIES
 from office_support.retrieval import BM25Index
 
 DATA_PATH = Path(__file__).resolve().parents[2] / "data"
-PRIORITIES = {"P1", "P2", "P3", "P4"}
 MAX_K = 10
 
 

@@ -12,12 +12,12 @@ import urllib.request
 from dataclasses import dataclass
 
 from office_support.agents import AGENTS as AGENTS_DEF
+from office_support.domain.policy import CRITICAL, OFFICES, RESPONSE_TIMES
+from office_support.domain.state import Action, Result, Step
 from office_support.model import OLLAMA_DEFAULT_URL, Model, OllamaModel, SimulatedModel
-from office_support.orchestrator import CRITICAL, RESPONSE_TIMES, orchestrate, trajectory
-from office_support.state import Action, Result, Step
+from office_support.orchestration import orchestrate, trajectory
 from office_support.tools import Network
 
-OFFICES = ("MAD-01", "MAD-02", "BCN-01", "VAL-01")
 SIMULATED = "simulated"
 
 
@@ -135,7 +135,7 @@ def trajectory_text(result: Result) -> str:
 
 AGENTS = ("classifier", "diagnosis", "knowledge", "escalation")
 
-# Same text as docs/priority-guide.md and same times as the orchestrator (the tests check
+# Same text as docs/priority-guide.md and same times as the policy (the tests check
 # it): the web only explains them, it decides nothing.
 PRIORITY_CRITERIA = {
     "P1": "affects more than one office, or a critical service is down",
